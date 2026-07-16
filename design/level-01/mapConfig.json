@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "mapId": "idea-garrison-level-01",
+  "name": "论辩广场守卫战",
+  "grid": { "columns": 18, "rows": 12, "origin": "top-left", "columnLabels": "1-18", "rowLabels": "1-12" },
+  "legend": {
+    "X": "blocked",
+    "r": "enemy_road",
+    "G": "ground_deploy",
+    "H": "highland_deploy",
+    "A": "entry_a",
+    "B": "entry_b",
+    "C": "entry_c",
+    "K": "philosophers_stone"
+  },
+  "tileRows": [
+    "XXXXXXXXXXXXXCrrrX",
+    "XXXXXXXXXXXrrrXXXX",
+    "ArrrHXXXXXrGXXXXXX",
+    "XXXGHXHXXHrrrrXXXX",
+    "XXXrrGrGrXXXGXXXXX",
+    "XXXXXXHXGrGrrrXXXX",
+    "XXXrrGrGrHXXHGGKXX",
+    "XXXGHXXXXXXXXXXXXX",
+    "XXXrXXXXXXXXXXXXXX",
+    "BrrrXXXXXXXXXXXXXX",
+    "XXXXXXXXXXXXXXXXXX",
+    "XXXXXXXXXXXXXXXXXX"
+  ],
+  "paths": {
+    "A": [[1,3],[2,3],[3,3],[4,3],[4,4],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[9,6],[10,6],[11,6],[12,6],[13,6],[14,6],[14,7],[15,7],[16,7]],
+    "B": [[1,10],[2,10],[3,10],[4,10],[4,9],[4,8],[4,7],[5,7],[6,7],[7,7],[8,7],[9,7],[9,6],[10,6],[11,6],[12,6],[13,6],[14,6],[14,7],[15,7],[16,7]],
+    "C": [[17,1],[16,1],[15,1],[14,1],[14,2],[13,2],[12,2],[12,3],[11,3],[11,4],[12,4],[13,4],[13,5],[13,6],[14,6],[14,7],[15,7],[16,7]]
+  },
+  "entrances": { "A": [1,3], "B": [1,10], "C": [17,1] },
+  "core": [16,7],
+  "strategyZones": {
+    "aApproach": [[4,4],[6,5]],
+    "bApproach": [[4,8],[6,7]],
+    "debatePlaza": [[8,5],[8,7],[9,6],[11,6]],
+    "cSkywalk": [[12,3],[13,5]],
+    "lastStand": [[14,7],[15,7]]
+  },
+  "deploymentSlots": {
+    "ground": [[4,4],[6,5],[4,8],[6,7],[8,5],[8,7],[9,6],[11,6],[12,3],[13,5],[14,7],[15,7]],
+    "highland": [[5,3],[5,4],[7,4],[10,4],[7,6],[10,7],[13,7],[5,8]]
+  },
+  "notes": {
+    "routes": "A/B merge at [9,6] in the Debate Plaza. C remains independent through the upper skywalk until [14,6].",
+    "deployment": "Ground slots occupy roads and can block. Highland slots are off-road and cannot block.",
+    "artHandoff": "Use tileRows only for logic. The final art must hide the grid and embed roads in the academy architecture."
+  }
+}
