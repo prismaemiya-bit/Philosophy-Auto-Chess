@@ -42,14 +42,14 @@ if not exist "node_modules" (
 rem This launcher owns port 3000.  Stop the prior launcher instance first so
 rem the browser can never silently stay connected to an older dev server.
 for /f "tokens=5" %%P in ('netstat -ano ^| findstr ":3000" ^| findstr "LISTENING"') do (
-  echo Stopping previous Sages' Glory server, PID %%P...
+  echo Stopping previous Philosophy Auto Chess server, PID %%P...
   taskkill /PID %%P /T /F >nul 2>&1
 )
 timeout /t 1 /nobreak >nul
 
 rem --strictPort prevents Vite from moving to 3001 while the launcher still
 rem opens 3000.  Every launch therefore serves this exact folder.
-start "Sages' Glory Server" %ComSpec% /d /k ""%NPM_CMD%" run dev -- --host 127.0.0.1 --port 3000 --strictPort"
+start "Philosophy Auto Chess Server" %ComSpec% /d /k ""%NPM_CMD%" run dev -- --host 127.0.0.1 --port 3000 --strictPort"
 timeout /t 3 /nobreak >nul
 start "" "http://127.0.0.1:3000/?launcher=%RANDOM%%RANDOM%"
 exit /b 0

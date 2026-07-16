@@ -1,4 +1,4 @@
-# Sages' Glory v0.1 Demo
+# Philosophy Auto Chess — 往哲荣耀 v0.1 Demo
 
 ## Goal
 

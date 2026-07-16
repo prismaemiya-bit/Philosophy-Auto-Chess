@@ -1,4 +1,4 @@
-《往哲荣耀》v0.1 Demo 极简说明
+《往哲荣耀》（Philosophy Auto Chess）v0.1 Demo 极简说明
 
 启动
 完整解压压缩包后，双击“启动往哲荣耀.cmd”（或 start-game.cmd）。无需安装 Node、无需联网、无需输入命令。请勿只复制启动器；runtime 与 dist 文件夹必须保留在同一目录。路径可以包含中文和空格。

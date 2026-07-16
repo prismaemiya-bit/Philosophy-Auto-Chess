@@ -122,5 +122,6 @@ npm.cmd test
 - 修复出售回收回归：旧公式会把 1 费 1 星棋子算成 0 金币。现按实际合成投入计算，1 星返还卡面费用，2 星返还三份卡面费用减 1，3 星返还九份卡面费用减 2，且最低返还 1 金币。引擎测试和系统 Chrome 拖入商店测试均断言出售后金币可见增加。
 - 最终门禁：默认测试 79/79、TypeScript 无错误、lint 无错误、production build 成功、系统 Chrome 交互回归通过。
 - 修复王城屏障 C 路穿透：C 路核心中心线与屏障锚点恰好相距 8，旧的通用严格 `< 8` 接触判定导致屏障空闲时也永远接不到 C 路。仅为王城屏障增加 10 的最终防线接触范围，法国街垒/公社仍使用原 8 范围，地图和路线坐标未改。新增 A/B/C 三路到达核心前均被屏障截住、C 路不结算漏怪伤害的回归；完整门禁 80/80 通过。
-- 生成首个正式试玩包 `sages-glory-v0.1-demo-windows-portable.zip`：首屏改为“欢迎来到往哲荣耀 / 开始往哲荣耀”，便携包捆绑 Windows x64 Node 24 运行时，提供中文与英文相对路径启动器，不携带本地存档。完整门禁 80/80；发布烟雾测试在中文空格路径和全新 Chrome 用户目录中通过购买、部署、第一波、关闭重启与 V6 续档。
-- GitHub 展示发布：初始化公开仓库 `prismaemiya-bit/Ideological-Bastion`，补齐 MIT License、英文黑客松 README、Demo 说明与四张精选截图；依赖、构建产物、运行时、发行包、原始自动化截图和本地 Codex 配置均由 `.gitignore` 排除。
+- 生成首个正式试玩包 `philosophy-auto-chess-v0.1-demo-windows-portable.zip`：首屏改为“欢迎来到往哲荣耀 / 开始往哲荣耀”，便携包捆绑 Windows x64 Node 24 运行时，提供中文与英文相对路径启动器，不携带本地存档。完整门禁 80/80；发布烟雾测试在中文空格路径和全新 Chrome 用户目录中通过购买、部署、第一波、关闭重启与 V6 续档。
+- GitHub 展示发布：公开仓库统一命名为 `prismaemiya-bit/Philosophy-Auto-Chess`，补齐 MIT License、英文黑客松 README、Demo 说明与四张精选截图；依赖、构建产物、运行时、发行包、原始自动化截图和本地 Codex 配置均由 `.gitignore` 排除。
+- 品牌名称收口：中文名固定为“往哲荣耀”，英文名固定为“Philosophy Auto Chess”；保留 `idea-garrison-*` 旧存档键、事件名和稳定地图 ID 作为兼容标识，不对玩家展示。

@@ -3,10 +3,10 @@ param([string]$ReleaseRoot = (Join-Path $PSScriptRoot "..\release"))
 $ErrorActionPreference = "Stop"
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $releaseRoot = [IO.Path]::GetFullPath($ReleaseRoot)
-$name = "sages-glory-v0.1-demo-windows-portable"
+$name = "philosophy-auto-chess-v0.1-demo-windows-portable"
 $target = Join-Path $releaseRoot $name
 $packageZip = Join-Path $releaseRoot "$name.zip"
-$sourceZip = Join-Path $releaseRoot "sages-glory-v0.1-demo-source.zip"
+$sourceZip = Join-Path $releaseRoot "philosophy-auto-chess-v0.1-demo-source.zip"
 
 foreach ($path in @($target, $packageZip, $sourceZip)) {
   if (Test-Path -LiteralPath $path) { throw "Demo artifact already exists and will not be overwritten: $path" }
@@ -33,7 +33,7 @@ Copy-Item -LiteralPath (Join-Path $root "QUICKSTART.txt") -Destination $target
 Copy-Item -LiteralPath (Join-Path $root "RELEASE_NOTES_v0.1-demo.md") -Destination $target
 
 $forbidden = Get-ChildItem -LiteralPath $target -Recurse -Force | Where-Object {
-  $_.FullName -match "(User Data|Local Storage|IndexedDB|idea-garrison-v01-save|sages-glory-save|\.log$|\.pid$)"
+  $_.FullName -match "(User Data|Local Storage|IndexedDB|idea-garrison-v01-save|philosophy-auto-chess-save|\.log$|\.pid$)"
 }
 if ($forbidden) { throw "Release contains local state or log files: $($forbidden.FullName -join ', ')" }
 
@@ -46,7 +46,7 @@ Set-Content -LiteralPath (Join-Path $target "SHA256SUMS.txt") -Value $manifest -
 & tar.exe -a -cf $packageZip -C $target .
 if ($LASTEXITCODE -ne 0) { throw "Unable to create portable ZIP." }
 
-$staging = Join-Path ([IO.Path]::GetTempPath()) "sages-glory-v0.1-demo-source"
+$staging = Join-Path ([IO.Path]::GetTempPath()) "philosophy-auto-chess-v0.1-demo-source"
 if (Test-Path -LiteralPath $staging) { Remove-Item -LiteralPath $staging -Recurse -Force }
 New-Item -ItemType Directory -Path $staging | Out-Null
 $sourceItems = @(

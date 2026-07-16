@@ -23,14 +23,14 @@ async function render() {
   );
 }
 
-test("server-renders the Sages' Glory landing screen", async () => {
+test("server-renders the Philosophy Auto Chess landing screen", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>往哲荣耀 · V0\.1 Demo<\/title>/i);
-  assert.match(html, /SAGES(?:'|&#x27;) GLORY \/ DEMO BUILD/);
+  assert.match(html, /<title>往哲荣耀 · Philosophy Auto Chess · V0\.1 Demo<\/title>/i);
+  assert.match(html, /PHILOSOPHY AUTO CHESS \/ DEMO BUILD/);
   assert.match(html, /欢迎来到往哲荣耀/);
   assert.match(html, /开始往哲荣耀/);
 });
@@ -109,7 +109,7 @@ test("keeps game presentation and replaceable assets scoped", async () => {
   assert.match(client, /visibleIds = allResonanceIds\.filter/, "the resonance rail hides traits absent from the current lineup");
   assert.match(client, /aria-label="局内资源"/, "the command rail owns a separate resource dashboard below the forecast");
   assert.match(client, /WAVE INTELLIGENCE/);
-  assert.match(client, /GLORY STATUS/);
+  assert.match(client, /GAME STATUS/);
   assert.match(client, /RESERVE ROSTER/);
   assert.match(client, /IDEA MARKET/);
   assert.match(client, /className="shop-odds"/);

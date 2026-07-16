@@ -1,8 +1,8 @@
-# Sages' Glory — 往哲荣耀
+# Philosophy Auto Chess — 往哲荣耀
 
-![Sages' Glory battlefield](screenshots/battlefield-1920x1080.png)
+![Philosophy Auto Chess battlefield](screenshots/battlefield-1920x1080.png)
 
-**Sages' Glory** is a single-player strategy game prototype that combines fixed-route tower defense with auto-battler economy and team-building. Deploy philosophers across three authored lanes, build philosophical resonances, make preparation-stage decisions, and defend the Philosopher's Stone through ten escalating waves.
+**Philosophy Auto Chess** is a single-player strategy game prototype that combines fixed-route tower defense with auto-battler economy and team-building. Deploy philosophers across three authored lanes, build philosophical resonances, make preparation-stage decisions, and defend the Philosopher's Stone through ten escalating waves.
 
 This repository contains the source for the **v0.1 Demo**. The interface is currently in Simplified Chinese.
 

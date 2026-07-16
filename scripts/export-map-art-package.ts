@@ -101,9 +101,9 @@ async function render(name: string, source: string) {
 
 await mkdir(outputDirectory, { recursive: true });
 await Promise.all([
-  render("idea-garrison-map-construction-template-1600x900.png", template),
-  render("idea-garrison-map-validation-overlay-1600x900.png", overlay),
-  render("idea-garrison-map-clean-reference-1600x900.png", clean),
+  render("philosophy-auto-chess-map-construction-template-1600x900.png", template),
+  render("philosophy-auto-chess-map-validation-overlay-1600x900.png", overlay),
+  render("philosophy-auto-chess-map-clean-reference-1600x900.png", clean),
 ]);
 await writeFile(path.join(outputDirectory, "map-layout-manifest.json"), `${JSON.stringify({ ...manifest, fingerprint }, null, 2)}\n`, "utf8");
 await copyFile(path.resolve("MAP_ART_SPEC.md"), path.join(outputDirectory, "MAP_ART_SPEC.md"));

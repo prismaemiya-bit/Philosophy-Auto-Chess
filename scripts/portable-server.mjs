@@ -40,7 +40,7 @@ const server = createServer(async (incoming, outgoing) => {
   try {
     if (incoming.url === "/__idea_garrison_health") {
       outgoing.writeHead(200, { "content-type": "application/json; charset=utf-8" });
-      outgoing.end(JSON.stringify({ app: "sages-glory", version: "v0.1-demo" }));
+      outgoing.end(JSON.stringify({ app: "philosophy-auto-chess", version: "v0.1-demo" }));
       return;
     }
     const chunks = [];

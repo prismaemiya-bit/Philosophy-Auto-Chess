@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "..");
-const releaseZip = path.join(root, "release", "sages-glory-v0.1-demo-windows-portable.zip");
+const releaseZip = path.join(root, "release", "philosophy-auto-chess-v0.1-demo-windows-portable.zip");
 const chromePath = process.env.CHROME_PATH ?? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const port = Number(process.env.IDEA_GARRISON_RELEASE_PORT ?? 42108);
 const remotePort = port + 1000;
