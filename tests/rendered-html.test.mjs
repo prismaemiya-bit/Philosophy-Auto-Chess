@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import releaseInfo from "../release-info.json" with { type: "json" };
 
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -29,17 +30,19 @@ test("server-renders the Philosophy Auto Chess landing screen", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>往哲荣耀 · Philosophy Auto Chess · V0\.1 Demo<\/title>/i);
-  assert.match(html, /PHILOSOPHY AUTO CHESS \/ DEMO BUILD/);
+  assert.match(html, new RegExp(`<title>${releaseInfo.productName} · ${releaseInfo.englishName} · ${releaseInfo.displayVersion} · ${releaseInfo.developer}<\\/title>`, "i"));
+  assert.match(html, /PHILOSOPHY AUTO CHESS \/ V0\.1\.1/);
+  assert.match(html, /折射棱镜开发/);
   assert.match(html, /欢迎来到往哲荣耀/);
   assert.match(html, /开始往哲荣耀/);
 });
 
 test("keeps game presentation and replaceable assets scoped", async () => {
-  const [page, layout, client, assets, combatCss, dragSafety, mapArt, positions, browserInteractions] = await Promise.all([
+  const [page, layout, client, combatStatus, assets, combatCss, dragSafety, mapArt, positions, browserInteractions] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/game/GameClient.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/game/CombatStatus.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/game/assets.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/game/combat-ui.css", import.meta.url), "utf8"),
     readFile(new URL("../app/game/drag-safety.css", import.meta.url), "utf8"),
@@ -64,6 +67,19 @@ test("keeps game presentation and replaceable assets scoped", async () => {
   assert.match(assets, /enemyAssets/);
   assert.match(assets, /replacements/);
   assert.match(client, /WaveToast/);
+  assert.match(combatStatus, /实际入账 \+\{summary\.totalGold\} 金币/);
+  assert.match(combatStatus, /30 上限溢出/);
+  assert.match(client, /预计利息（5\/10\/15档）/);
+  assert.match(client, /WaveRouteCue key=\{waveCue\.sequence\}/, "wave start renders a deterministic route warning before combat begins");
+  assert.match(client, /startWave\(stateRef\.current\)/, "the delayed route cue starts from the latest preparation state instead of a stale closure");
+  assert.match(client, /return \(\) => window\.clearTimeout\(timer\)/, "transient feedback timers clean up on lifecycle changes");
+  assert.match(client, /经验 \+4/);
+  assert.doesNotMatch(client, /理念重排 · 商店已刷新/, "refresh feedback stays visual without redundant copy");
+  assert.match(combatStatus, /第 \$\{summary\.wave\} 波肃清/);
+  assert.match(combatCss, /map-field \.wave-toast\.expanded\{position:absolute/);
+  assert.match(combatCss, /wave-route-cue/);
+  assert.match(combatCss, /shop-grid\.is-refreshing/);
+  assert.match(combatCss, /prefers-reduced-motion:reduce/);
   assert.match(client, /className="map-inspector"/);
   assert.match(client, /VictorySequence/);
   assert.match(client, /DefeatSequence/);
@@ -113,10 +129,21 @@ test("keeps game presentation and replaceable assets scoped", async () => {
   assert.match(client, /RESERVE ROSTER/);
   assert.match(client, /IDEA MARKET/);
   assert.match(client, /className="shop-odds"/);
+  assert.match(client, /挡 \{unit\.block\}·防 \{unit\.stats\.guard\}/, "shop decisions expose the Guard stat used by incoming enemy damage");
   assert.match(client, /ResonanceDirectory/, "inactive resonances remain inspectable outside the battlefield text layer");
   assert.match(client, /import\.meta\.env\.DEV && local && \(query\.get\("devtools"\) === "1"/, "cheat and calibration tools require a development build and explicit localhost opt-in");
   assert.match(client, /FeedbackTools state=\{state\}/, "production settings retain the read-only balance feedback exporter");
-  assert.match(client, /idea-garrison-balance-report-v1/, "feedback reports use a versioned export format");
+  assert.match(client, /idea-garrison-balance-report-v2/, "feedback reports use a versioned export format");
+  assert.match(client, /局后报告与反馈/);
+  assert.match(client, /WaveDiagnostic/);
+  assert.match(client, /王座 10% 实际增量/);
+  assert.match(client, /射程和站位变化仍需与同阵容正常部署的另一局比较/);
+  assert.match(client, /report\.economy\.refreshes/);
+  assert.match(client, /report\.economy\.xpPurchases/);
+  assert.match(client, /post-route-report/);
+  assert.match(client, /post-unit-report/);
+  assert.match(dragSafety, /post-battle-history/);
+  assert.match(dragSafety, /post-king-report/);
   assert.doesNotMatch(client, /<span>关卡控制<\/span><em>手动波次<\/em>/, "non-interactive wave-control heading is removed");
   assert.match(client, /settings-note[^\n]*devToolsEnabled[^\n]*TestControls/, "development controls live inside settings instead of the command rail");
   assert.match(client, /调整革命节点（3 项）/);
@@ -134,6 +161,8 @@ test("keeps game presentation and replaceable assets scoped", async () => {
   assert.doesNotMatch(client, /className="sell-zone"/);
   assert.match(dragSafety, /map-art[^}]*pointer-events:none/);
   assert.match(dragSafety, /battlefield-showcase\.png/);
+  assert.match(dragSafety, /philosophy-map-final-v1-1600x900\.png/);
+  assert.match(dragSafety, /map-field\.is-dragging>\.map-art\{filter:saturate\(\.68\) brightness\(\.56\);transition:none\}/);
   assert.match(dragSafety, /is-dragging \.enemy-token[^}]*pointer-events:none/);
   assert.match(dragSafety, /map-inspector[^}]*width:218px/);
   assert.match(dragSafety, /range-preview[^}]*border-radius:50%/);

@@ -39,6 +39,8 @@ export type EffectProfile = {
   derivedEffect?: boolean;
   copyable?: boolean;
   tags?: string[];
+  /** Portion added by the throne's 10% amplification, for diagnostics only. */
+  throneBonusAmount?: number;
 };
 
 export type CombatEvent = EffectProfile & { sequence: number };

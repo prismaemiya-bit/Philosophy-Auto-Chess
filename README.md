@@ -4,7 +4,7 @@
 
 **Philosophy Auto Chess** is a single-player strategy game prototype that combines fixed-route tower defense with auto-battler economy and team-building. Deploy philosophers across three authored lanes, build philosophical resonances, make preparation-stage decisions, and defend the Philosopher's Stone through ten escalating waves.
 
-This repository contains the source for the **v0.1 Demo**. The interface is currently in Simplified Chinese.
+This repository contains the source for **v0.1.1**, developed by **折射棱镜**. The interface is currently in Simplified Chinese.
 
 ## Features
 
@@ -74,7 +74,7 @@ The test command runs TypeScript checking, ESLint, a production build, determini
 
 ## Demo notes
 
-See [DEMO.md](DEMO.md) for gameplay instructions, scope and feedback guidance. The current battlefield art is temporary; route, deployment and combat coordinates are already frozen for the Demo.
+See [DEMO.md](DEMO.md) for gameplay instructions, scope and feedback guidance. v0.1.1 uses the final 1600×900 battlefield artwork while preserving the frozen route, deployment and combat coordinates.
 
 ## Development process
 

@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import test from "node:test";
 import { characterById, characters } from "../app/game/characters.ts";
-import { CAVE_SHADOW_PHASE, DOGMA_COLOSSUS_PHASES, advanceBattle, battleOf, effectiveAttackRange, enemyTemplates, resolveBlocking, restartCurrentWave, retryWave, startWave, type BattleState } from "../app/game/battle.ts";
-import { THRONE_SLOT, buy, chooseEnlightenmentAgendas, chooseResearch, ECONOMY_RULES, gainXp, makeInitialState, maxDeployForLevel, migrateState, move, normalizeProgress, pickShop, refresh, saleRefund, sell, serializeGameState, settlementIncome, shopOddsForLevel, updatePreparationPlan, type GameState } from "../app/game/engine.ts";
+import { CAVE_SHADOW_PHASE, DOGMA_COLOSSUS_PHASES, advanceBattle, battleOf, effectiveAttackRange, enemyTemplates, enemyUnitDamage, resolveBlocking, restartCurrentWave, retryWave, startWave, type BattleState } from "../app/game/battle.ts";
+import { BENCH_SLOTS, DEPLOY_SLOTS, THRONE_SLOT, UnsupportedSaveVersionError, buy, chooseEnlightenmentAgendas, chooseResearch, ECONOMY_RULES, gainXp, isFieldedSlot, isSlotId, makeInitialState, maxDeployForLevel, migrateState, move, normalizeProgress, pickShop, refresh, saleRefund, sell, serializeGameState, settlementIncome, shopOddsForLevel, updatePreparationPlan, type GameState } from "../app/game/engine.ts";
 import { deploymentPoint, deploymentSlots, distance, distanceToRoute, MAP_ART_SAFE_ZONES, MAP_FOOTPRINTS, MAP_HEIGHT, MAP_LAYOUT_FINGERPRINT, MAP_LAYOUT_VERSION, MAP_PLATFORM_PATHS, MAP_ROAD_WIDTHS, MAP_WIDTH, ROYAL_BARRIER_POINT, revolutionNodePoint, revolutionNodes, routeDefinitions, routePoint, slotTerrain } from "../app/game/positions.ts";
 import { waveDefinition } from "../app/game/waves.ts";
 import { CombatEventQueue, StatusManager, createTraitSnapshot } from "../app/game/combat-core.ts";
@@ -213,7 +213,7 @@ test("Philosopher King throne is a stable one-population choice and closes safel
   const closed = sell(restored, "plato"); assert.equal(closed.ok, true); assert.ok(closed.state.pieces.every((piece) => piece.slotId !== THRONE_SLOT)); assert.equal(closed.state.pieces[0]?.slotId, "bench-1");
 });
 
-test("Philosopher King range, one-time 10 percent output and royal barrier formulas are bounded", () => {
+test("Philosopher King range, exact 10 percent output and royal barrier formulas are bounded", () => {
   const prepared: GameState = { ...makeInitialState(), level: 2, pieces: [
     { id: "plato", characterId: "plato", star: 2, slotId: "deploy-1" },
     { id: "king", characterId: "fichte", star: 1, slotId: THRONE_SLOT, throneReturnSlot: "deploy-3" },
@@ -223,11 +223,13 @@ test("Philosopher King range, one-time 10 percent output and royal barrier formu
   assert.equal(barrier?.capacity, 3); assert.equal(barrier?.maxHp, 504); assert.equal(barrier?.hp, 504); assert.equal(barrier?.defense, 24); assert.equal(barrier?.sourceId, "king");
   const target = { ...enemy("king-target", "ordinary", "upper", .9), hp: 900, maxHp: 900 };
   const withHit: GameState = { ...begun.state, battle: { ...begun.state.battle!, enemies: [target], spawnRemaining: ["ordinary"], cooldowns: { king: 99, plato: 99 }, eventQueue: [{ id: "king-hit", kind: "damage", sourceId: "king", targetKind: "enemy", targetId: target.id, amount: 100, sequence: 1 }] } };
-  const hit = advanceBattle(withHit); assert.equal(hit.battle?.enemies.find((unit) => unit.id === target.id)?.hp, 790);
+  const hit = advanceBattle(withHit); assert.equal(hit.battle?.enemies.find((unit) => unit.id === target.id)?.hp, 790); assert.equal(hit.battle?.statistics?.philosopherKing?.throneBonus.damage, 10);
+  const areaHit: GameState = { ...begun.state, battle: { ...begun.state.battle!, enemies: [target], spawnRemaining: ["ordinary"], cooldowns: { king: 99, plato: 99 }, eventQueue: [{ id: "king-area", kind: "damage", sourceId: "king", targetKind: "position", position: routePoint(target.progress, target.lane), radius: 3, amount: 100, sequence: 1 }] } };
+  const area = advanceBattle(areaHit); assert.equal(area.battle?.enemies.find((unit) => unit.id === target.id)?.hp, 790, "position effects must receive the throne bonus exactly once"); assert.equal(area.battle?.statistics?.philosopherKing?.throneBonus.damage, 10);
   const derived: GameState = { ...begun.state, battle: { ...begun.state.battle!, enemies: [target], spawnRemaining: ["ordinary"], cooldowns: { king: 99, plato: 99 }, eventQueue: [{ id: "king-derived", kind: "damage", sourceId: "king", targetKind: "enemy", targetId: target.id, amount: 100, derivedEffect: true, sequence: 1 }] } };
   assert.equal(advanceBattle(derived).battle?.enemies.find((unit) => unit.id === target.id)?.hp, 800);
   const supportOutput: GameState = { ...begun.state, pieces: begun.state.pieces.map((piece) => piece.id === "king" ? { ...piece, hp: 500, shield: 0 } : piece), battle: { ...begun.state.battle!, enemies: [target], spawnRemaining: ["ordinary"], cooldowns: { king: 99, plato: 99 }, eventQueue: [{ id: "king-heal", kind: "heal", sourceId: "king", targetKind: "ally", targetId: "king", amount: 100, sequence: 1 }, { id: "king-shield", kind: "shield", sourceId: "king", targetKind: "ally", targetId: "king", amount: 100, sequence: 2 }] } };
-  const supported = advanceBattle(supportOutput).pieces.find((piece) => piece.id === "king"); assert.ok(Math.abs((supported?.hp ?? 0) - 610) < .0001); assert.ok(Math.abs((supported?.shield ?? 0) - 110) < .0001);
+  const supportResult = advanceBattle(supportOutput); const supported = supportResult.pieces.find((piece) => piece.id === "king"); assert.ok(Math.abs((supported?.hp ?? 0) - 610) < .0001); assert.ok(Math.abs((supported?.shield ?? 0) - 110) < .0001); assert.ok(Math.abs((supportResult.battle?.statistics?.philosopherKing?.throneBonus.healing ?? 0) - 10) < .0001); assert.ok(Math.abs((supportResult.battle?.statistics?.philosopherKing?.throneBonus.shielding ?? 0) - 10) < .0001);
   const rangedProgress = .85; assert.ok(distance(deploymentPoint(THRONE_SLOT), routePoint(rangedProgress, "upper")) > effectiveAttackRange({ ...prepared.pieces[1]!, slotId: "deploy-3" }));
   const rangedTarget = { ...enemy("ranged-target", "ordinary", "upper", rangedProgress), hp: 900, maxHp: 900 };
   const ranged = advanceBattle({ ...begun.state, battle: { ...begun.state.battle!, enemies: [rangedTarget], spawnRemaining: ["ordinary"], cooldowns: { king: 0, plato: 99 }, eventQueue: [] } });
@@ -244,7 +246,7 @@ test("royal barrier uses hard capacity, takes contact damage, never emits resour
   const blocked = resolveBlocking([enemy("boss", "boss", "upper", near), enemy("overflow", "ordinary", "upper", near)], begun.pieces, [barrier], 0);
   assert.equal(blocked.find((unit) => unit.id === "boss")?.blockedBy, `structure:${barrier.id}`); assert.equal(blocked.find((unit) => unit.id === "overflow")?.blockedBy, undefined);
   let current: GameState = { ...begun, battle: { ...begun.battle!, spawnRemaining: ["ordinary"], enemies: blocked, structures: [{ ...barrier, hp: 1 }], enemyCooldowns: {} } };
-  current = advanceBattle(current); assert.equal(current.battle?.goldEarned, 0); assert.equal(current.battle?.structures?.find((structure) => structure.id === barrier.id)?.hp, 0); assert.ok(current.battle?.effects.some((effect) => effect.type === "barrierBreak"));
+  current = advanceBattle(current); assert.equal(current.battle?.goldEarned, 0); assert.equal(current.battle?.structures?.find((structure) => structure.id === barrier.id)?.hp, 0); assert.ok(current.battle?.effects.some((effect) => effect.type === "barrierBreak")); assert.equal(current.battle?.statistics?.philosopherKing?.barrier.damageTaken, 1); assert.equal(current.battle?.statistics?.philosopherKing?.barrier.hits, 1); assert.equal(current.battle?.statistics?.philosopherKing?.barrier.broke, true); assert.ok((current.battle?.statistics?.philosopherKing?.barrier.blockedWeight ?? 0) > 0);
   current = advanceBattle(current); assert.ok(!current.battle?.structures?.some((structure) => structure.kind === "royal-barrier"));
   const rebuilt = startWave({ ...begun, wave: 2, battle: { ...battleOf(begun), status: "victory" } }); assert.equal(rebuilt.ok, true); assert.equal(rebuilt.state.battle?.structures?.filter((structure) => structure.kind === "royal-barrier").length, 1);
 });
@@ -318,6 +320,30 @@ test("a wave checkpoint restores gold, shop, core and every unit to the start of
   assert.equal(restarted.state.battle?.status, "idle");
 });
 
+test("defeat retry restores the philosopher stone to its non-full wave checkpoint", () => {
+  const prepared: GameState = {
+    ...makeInitialState(() => 0),
+    coreHp: 68,
+    pieces: [{ id: "front", characterId: "fichte", star: 1, slotId: "deploy-1" }],
+  };
+  const begun = startWave(prepared);
+  assert.equal(begun.ok, true);
+
+  const defeated: GameState = {
+    ...begun.state,
+    coreHp: 0,
+    battle: { ...begun.state.battle!, status: "defeat" },
+  };
+  const retried = retryWave(defeated);
+  assert.equal(retried.ok, true);
+  assert.equal(retried.state.coreHp, 68);
+  assert.equal(retried.state.battle?.status, "idle");
+
+  const restarted = restartCurrentWave(defeated);
+  assert.equal(restarted.ok, true);
+  assert.equal(restarted.state.coreHp, 68);
+});
+
 test("serialized saves keep only durable game state and restart combat from preparation", () => {
   const prepared = updatePreparationPlan({ ...makeInitialState(), gold: 16, level: 4, xp: 3, wave: 5, coreHp: 91, shop: ["plato", "hume", null, "kant", "rousseau"], pieces: [
     { id: "front", characterId: "plato", star: 2, slotId: "deploy-1" },
@@ -337,6 +363,16 @@ test("serialized saves keep only durable game state and restart combat from prep
   assert.equal(restored.gold, prepared.gold); assert.equal(restored.coreHp, prepared.coreHp); assert.deepEqual(restored.shop, prepared.shop);
   assert.deepEqual(restored.pieces.map((piece) => ({ id: piece.id, hp: piece.hp, energy: piece.energy, slotId: piece.slotId })), prepared.pieces.map((piece) => ({ id: piece.id, hp: piece.hp, energy: piece.energy, slotId: piece.slotId })));
   assert.equal(restored.battle, undefined); assert.equal(restored.waveCheckpoint, undefined);
+});
+
+test("running combat ticks keep one stable autosave payload until settlement", () => {
+  const prepared: GameState = { ...makeInitialState(() => 0), pieces: [{ id: "guard", characterId: "fichte", star: 1, slotId: "deploy-1" }] };
+  const begun = startWave(prepared).state;
+  const checkpointPayload = serializeGameState(begun);
+  const advanced = advanceBattle(begun);
+  assert.equal(serializeGameState(advanced), checkpointPayload, "combat-only changes must not produce another durable payload");
+  const settled = advanceBattle({ ...begun, battle: { ...begun.battle!, spawnRemaining: [], enemies: [] } });
+  assert.notEqual(serializeGameState(settled), checkpointPayload, "settlement must produce a new durable payload");
 });
 
 test("legacy saves migrate safely into the new roster", () => {
@@ -434,6 +470,36 @@ test("blocked enemies use deterministic contact attacks instead of damaging the 
   assert.ok((front?.hp ?? 840) < 840); assert.equal(next.coreHp, frontline.coreHp); assert.ok(next.battle?.effects.some((effect) => effect.type === "enemyHit" && effect.enemyId === "contact"));
 });
 
+test("late-wave unit pressure makes health and Guard matter while fast clearing can preserve a fragile blocker", () => {
+  assert.ok(enemyUnitDamage(28, 8, "hobbes") < enemyUnitDamage(28, 8, "epicurus"), "higher Guard must reduce the same enemy hit");
+
+  const deathTick = (characterId: "epicurus" | "hobbes") => {
+    const id = `isolated-${characterId}`;
+    // Keep the core from ending this isolated unit-pressure fixture before the blocker can be observed.
+    let state = startWave({ ...makeInitialState(() => 0), wave: 8, level: 8, coreHp: 1_000, pieces: [{ id, characterId, star: 1 as const, slotId: "deploy-1" as const }] }).state;
+    for (let tick = 1; tick <= 240 && state.battle?.status === "running"; tick += 1) {
+      state = advanceBattle(state);
+      if (!state.pieces.some((piece) => piece.id === id)) return tick;
+    }
+    return Infinity;
+  };
+  const fragileDeath = deathTick("epicurus");
+  const tankDeath = deathTick("hobbes");
+  assert.ok(Number.isFinite(fragileDeath), "an unsupported one-star blocker must be able to die in W8");
+  assert.ok(Number.isFinite(tankDeath), "high block capacity must not make an isolated tank immortal");
+  assert.ok(tankDeath < fragileDeath, "blocking three weight must carry more incoming-pressure cost than blocking one");
+
+  const blockerId = "covered-blocker";
+  let covered = startWave({ ...makeInitialState(() => 0), wave: 8, level: 8, pieces: [
+    { id: blockerId, characterId: "epicurus", star: 1, slotId: "deploy-1" },
+    { id: "rapid-clear", characterId: "hegel", star: 3, slotId: "deploy-13" },
+    { id: "rapid-clear-2", characterId: "aristotle", star: 3, slotId: "deploy-14" },
+    { id: "rapid-clear-3", characterId: "descartes", star: 3, slotId: "deploy-15" },
+  ] }).state;
+  for (let tick = 0; tick < 240 && covered.battle?.status === "running"; tick += 1) covered = advanceBattle(covered);
+  assert.ok(covered.pieces.some((piece) => piece.id === blockerId), "sufficient clearing speed must remain a valid alternative to raw durability");
+});
+
 test("casters and elites create ranged pressure on deployed highland units without needing a blocker", () => {
   for (const kind of ["caster", "elite"] as const) {
     const highland = { id: `high-${kind}`, characterId: "aristotle", star: 1 as const, slotId: "deploy-13" as const, hp: 510, maxHp: 510 };
@@ -467,6 +533,83 @@ test("Cave Shadow triggers Turn Pain once, clears hard control and resets on ret
   assert.deepEqual(state.battle?.bossPhaseLog?.map((phase) => phase.id), [CAVE_SHADOW_PHASE.id]); assert.equal(cave?.stunTicks, 0); assert.ok((cave?.phaseSpeedUntil ?? 0) > (state.battle?.gameTime ?? 0)); assert.ok(!state.battle?.statuses?.some((status) => status.targetId === "cave" && (status.kind === "stun" || status.kind === "pause")));
   state = { ...state, battle: { ...state.battle!, eventQueue: [{ id: "repeat-half", kind: "damage", sourceId: "guard", targetKind: "enemy", targetId: "cave", amount: 1, sequence: 2 }] } }; state = advanceBattle(state); assert.equal(state.battle?.bossPhaseLog?.length, 1);
   const retryable = { ...state, waveCheckpoint: { gold: 8, level: 1, xp: 0, coreHp: 100, shop: [], pieces: [guard] }, battle: { ...state.battle!, status: "defeat" as const } }; const retried = retryWave(retryable); assert.deepEqual(retried.state.battle?.bossPhaseLog, []);
+});
+
+test("battle advancement never mutates its input and is replay-deterministic", () => {
+  const pieces: GameState["pieces"] = [
+    { id: "h", characterId: "hume", star: 1, slotId: "deploy-13", hp: 455, maxHp: 455 },
+    { id: "r", characterId: "russell", star: 1, slotId: "deploy-14", hp: 575, maxHp: 575 },
+  ];
+  const target = { ...enemy("immutable-target", "elite", "upper", .2), evidence: { count: 5, lastHitBySource: {} } };
+  const state: GameState = {
+    ...makeInitialState(() => 0),
+    level: 2,
+    pieces,
+    battle: {
+      ...running([target]),
+      traitSnapshot: createTraitSnapshot(pieces),
+      cooldowns: { h: 99, r: 99 },
+      psychoanalysis: { [target.id]: { sourceId: "h", targetId: target.id, stored: 1, expiresAt: 10 } },
+      eventQueue: [{ id: "immutable-hit", kind: "damage", sourceId: "h", targetKind: "enemy", targetId: target.id, amount: 10, sequence: 1 }],
+    },
+  };
+  const before = structuredClone(state);
+  const first = advanceBattle(state);
+  assert.deepEqual(state, before, "advanceBattle must not change nested records owned by its input");
+  const second = advanceBattle(state);
+  assert.deepEqual(second, first, "replaying one fixed tick from the same value must produce the same state");
+});
+
+test("failed retries restore level and experience before preparation bonuses reapply", () => {
+  const pieces: GameState["pieces"] = [
+    { id: "r", characterId: "rousseau", star: 1, slotId: "deploy-1" },
+    { id: "l", characterId: "locke", star: 1, slotId: "deploy-13" },
+    { id: "h", characterId: "hume", star: 1, slotId: "deploy-14" },
+  ];
+  const prepared: GameState = { ...makeInitialState(() => 0), level: 2, xp: 7, pieces, preparationPlan: { enlightenmentAgendas: ["education"] } };
+  const started = startWave(prepared).state;
+  assert.deepEqual({ level: started.level, xp: started.xp }, { level: 3, xp: 1 });
+  const retried = retryWave({ ...started, coreHp: 0, battle: { ...started.battle!, status: "defeat" } }).state;
+  assert.deepEqual({ level: retried.level, xp: retried.xp }, { level: 2, xp: 7 });
+  const restarted = startWave(retried).state;
+  assert.deepEqual({ level: restarted.level, xp: restarted.xp }, { level: 3, xp: 1 });
+});
+
+test("repeated defeat and retry cycles leave no combat-owned state or preparation drift", () => {
+  const pieces: GameState["pieces"] = [
+    { id: "r", characterId: "rousseau", star: 1, slotId: "deploy-1" },
+    { id: "l", characterId: "locke", star: 1, slotId: "deploy-13" },
+    { id: "h", characterId: "hume", star: 1, slotId: "deploy-14" },
+  ];
+  const baseline: GameState = { ...makeInitialState(() => 0), level: 2, xp: 7, pieces, preparationPlan: { enlightenmentAgendas: ["education"], pendingResearchSelections: [], activeResearches: undefined } };
+  let preparation = baseline;
+
+  for (let cycle = 0; cycle < 20; cycle += 1) {
+    const started = startWave(preparation).state;
+    const contaminated: GameState = {
+      ...started,
+      coreHp: 0,
+      battle: {
+        ...started.battle!,
+        status: "defeat",
+        eventQueue: [{ id: `stale-${cycle}`, kind: "damage", targetKind: "core", amount: 1, sequence: cycle }],
+        statuses: [{ id: `status-${cycle}`, targetId: "r", kind: "slow", magnitude: .5, expiresAt: 99 }],
+        structures: [{ id: `structure-${cycle}`, nodeId: "debate-plaza", point: { x: 0, y: 0 }, capacity: 1, createdAt: 0, expiresAt: 99 }],
+        delayedDevices: [{ id: `device-${cycle}`, sourceId: "r", position: { x: 0, y: 0 }, radius: 1, executeAt: 99, damage: 1, slowDuration: 1 }],
+      },
+    };
+    const retried = retryWave(contaminated);
+    assert.equal(retried.ok, true);
+    preparation = retried.state;
+    assert.deepEqual({ level: preparation.level, xp: preparation.xp, gold: preparation.gold }, { level: baseline.level, xp: baseline.xp, gold: baseline.gold });
+    assert.deepEqual(preparation.pieces, baseline.pieces);
+    assert.deepEqual(preparation.preparationPlan, baseline.preparationPlan);
+    assert.equal(preparation.battle?.status, "idle");
+    assert.deepEqual(preparation.battle?.eventQueue, []);
+    assert.deepEqual(preparation.battle?.statuses, []);
+    assert.deepEqual(preparation.battle?.structures, []);
+    assert.deepEqual(preparation.battle?.delayedDevices, []);
+  }
 });
 
 test("Absolute Spirit triggers objective spirit, world night and absolute knowledge exactly once in order", () => {
@@ -638,6 +781,37 @@ test("LastStand is shared and can prevent death only once per unit per wave", ()
   assert.equal(survivor, undefined);
 });
 
+test("a unit killed during a victorious wave returns for preparation and the next wave", () => {
+  const prepared: GameState = { ...makeInitialState(), level: 2, pieces: [
+    { id: "fallen", characterId: "socrates", star: 1, slotId: "deploy-1" },
+    { id: "survivor", characterId: "aristotle", star: 1, slotId: "deploy-13" },
+  ] };
+  const started = startWave(prepared).state;
+  const combat: GameState = {
+    ...started,
+    pieces: started.pieces.map((piece) => piece.id === "fallen" ? { ...piece, hp: 0 } : piece),
+    battle: {
+      ...started.battle!,
+      spawnRemaining: [],
+      enemies: [],
+      eventQueue: [{ id: "fallen-death", kind: "death", targetKind: "ally", targetId: "fallen", sequence: 1 }],
+    },
+  };
+
+  const settled = advanceBattle(combat);
+  assert.equal(settled.battle?.status, "victory");
+  assert.deepEqual(settled.pieces.map((piece) => piece.id), ["fallen", "survivor"]);
+  const restored = settled.pieces.find((piece) => piece.id === "fallen");
+  assert.equal(restored?.slotId, "deploy-1");
+  assert.equal(restored?.hp, characterById.socrates.stats.resolve);
+  assert.equal(settled.battle?.summary?.statistics.units.fallen?.deaths, 1);
+  assert.equal(settled.balanceHistory?.at(-1)?.outcome.deaths, 1);
+
+  const nextWave = startWave(settled);
+  assert.equal(nextWave.ok, true);
+  assert.equal(nextWave.state.pieces.find((piece) => piece.id === "fallen")?.hp, characterById.socrates.stats.resolve);
+});
+
 test("V4 combat snapshots are discarded without losing valid roster progress", () => {
   const migrated = migrateState({ saveVersion: 1, gold: 27, wave: 4, pieces: [{ id: "p", characterId: "plato", star: 2, slotId: "bench-1" }], battle: running([enemy("old", "ordinary")]) });
   assert.equal(migrated.battle, undefined); assert.equal(migrated.gold, 27); assert.equal(migrated.wave, 4); assert.equal(migrated.pieces[0]?.characterId, "plato");
@@ -659,12 +833,99 @@ test("V5/V6 migration discards combat snapshots and preserves durable progress s
   assert.equal(new Set(repairedRoster.pieces.map((piece) => piece.slotId)).size, repairedRoster.pieces.length);
 });
 
+test("save migration rejects future versions and rebuilds only legal stable piece fields", () => {
+  assert.throws(() => migrateState({ saveVersion: 7, gold: 30, pieces: [] }), UnsupportedSaveVersionError);
+  assert.throws(() => migrateState({ saveVersion: 6.1, gold: 30, pieces: [] }), UnsupportedSaveVersionError);
+  const migrated = migrateState({ saveVersion: 6, level: 1, pieces: Array.from({ length: 30 }, (_, index) => ({
+    id: `unsafe-${index}`,
+    characterId: "aristotle",
+    star: 1,
+    slotId: "deploy-13",
+    hp: 1,
+    energy: 999,
+    shield: 999,
+    contractGroupId: "imported-combat-state",
+    contractUntil: 999,
+    inductionHits: 2,
+  })) });
+  const stableKeys = new Set(["id", "characterId", "star", "slotId", "throneReturnSlot"]);
+  assert.ok(migrated.pieces.every((piece) => Object.keys(piece).every((key) => stableKeys.has(key))));
+  assert.equal(new Set(migrated.pieces.map((piece) => piece.id)).size, migrated.pieces.length);
+  assert.equal(new Set(migrated.pieces.map((piece) => piece.slotId)).size, migrated.pieces.length);
+  assert.ok(migrated.pieces.every((piece) => isSlotId(piece.slotId)));
+  assert.ok(migrated.pieces.filter((piece) => isFieldedSlot(piece.slotId)).length <= maxDeployForLevel(migrated.level));
+  assert.ok(migrated.pieces.length <= BENCH_SLOTS.length + maxDeployForLevel(migrated.level));
+  assert.ok([...BENCH_SLOTS, ...DEPLOY_SLOTS, THRONE_SLOT].every((slot) => isSlotId(slot)));
+  assert.equal(isSlotId("deploy-999"), false);
+});
+
 test("waves retain escalating threat budgets, Cave Shadow five, boss-only ten, core damage and retry", () => {
   const budgets = Array.from({ length: 10 }, (_, index) => waveDefinition(index + 1).threatBudget);
-  assert.deepEqual(budgets, [6, 10, 15, 21, 28, 36, 46, 58, 72, 90]);
+  assert.deepEqual(budgets, [6, 12, 18, 25, 32, 36, 52, 64, 72, 90]);
   assert.ok(budgets.every((budget, index) => index === 0 || budget > budgets[index - 1]!));
-  assert.ok(waveDefinition(5).enemies.includes("cave-boss")); assert.deepEqual(waveDefinition(10).enemies, ["boss"]); assert.equal(waveDefinition(10).boss, true);
+  assert.deepEqual([2, 3, 4].map((wave) => ({ health: waveDefinition(wave).healthMultiplier, interval: waveDefinition(wave).spawnInterval, enemies: waveDefinition(wave).enemies.length })), [
+    { health: 1.5, interval: 16, enemies: 5 },
+    { health: 1.95, interval: 14, enemies: 7 },
+    { health: 2.5, interval: 12, enemies: 9 },
+  ]);
+  assert.deepEqual([6, 7, 8, 9].map((wave) => ({ health: waveDefinition(wave).healthMultiplier, interval: waveDefinition(wave).spawnInterval, enemies: waveDefinition(wave).enemies.length })), [
+    { health: 3.8, interval: 11, enemies: 11 },
+    { health: 5.2, interval: 9, enemies: 13 },
+    { health: 6.2, interval: 9, enemies: 16 },
+    { health: 7, interval: 8, enemies: 18 },
+  ]);
+  assert.ok(waveDefinition(5).enemies.includes("cave-boss")); assert.ok(waveDefinition(5).enemies.includes("caster")); assert.equal(waveDefinition(5).enemies.length, 9); assert.equal(waveDefinition(5).healthMultiplier, 3.4); assert.equal(waveDefinition(5).spawnInterval, 10); assert.deepEqual(waveDefinition(10).enemies, ["boss"]); assert.equal(waveDefinition(10).boss, true);
   const defeated: GameState = { ...makeInitialState(), coreHp: 0, battle: { ...running([]), status: "defeat" } }; const retried = retryWave(defeated); assert.equal(retried.state.coreHp, 100);
+});
+
+test("early greed is punished by four while six remains a respite before the seven-to-nine ramp", () => {
+  const run = (wave: number, pieces: GameState["pieces"]) => {
+    let current = startWave({ ...makeInitialState(() => 0), wave, level: Math.max(3, pieces.length), pieces }).state;
+    for (let tick = 0; tick < 900 && current.battle?.status === "running"; tick += 1) current = advanceBattle(current);
+    return current;
+  };
+  const greedy: GameState["pieces"] = [
+    { id: "greedy-front", characterId: "fichte", star: 1, slotId: "deploy-1" },
+    { id: "greedy-range", characterId: "aristotle", star: 1, slotId: "deploy-13" },
+  ];
+  assert.equal(run(2, greedy).coreHp, 100);
+  assert.equal(run(3, greedy).coreHp, 100);
+  const greedyFour = run(4, greedy);
+  assert.equal(greedyFour.battle?.status, "victory");
+  assert.ok(greedyFour.coreHp < 100, "holding at two one-star units must start costing core health by W4");
+
+  const incoherent: GameState["pieces"] = [
+    { id: "bad-0", characterId: "epicurus", star: 1, slotId: "deploy-1" }, { id: "bad-1", characterId: "hobbes", star: 1, slotId: "deploy-3" },
+    { id: "bad-2", characterId: "rousseau", star: 1, slotId: "deploy-8" }, { id: "bad-3", characterId: "locke", star: 1, slotId: "deploy-10" },
+    { id: "bad-4", characterId: "aristotle", star: 1, slotId: "deploy-13" }, { id: "bad-5", characterId: "schelling", star: 1, slotId: "deploy-15" },
+    { id: "bad-6", characterId: "descartes", star: 1, slotId: "deploy-18" }, { id: "bad-7", characterId: "hume", star: 1, slotId: "deploy-20" },
+  ];
+  const six = run(6, incoherent); const seven = run(7, incoherent); const eight = run(8, incoherent); const nine = run(9, incoherent);
+  assert.equal(six.coreHp, 100, "W6 must remain the post-boss respite");
+  assert.equal(seven.coreHp, 100); assert.equal(seven.battle?.status, "victory");
+  assert.equal(eight.battle?.status, "victory"); assert.ok(eight.coreHp < seven.coreHp); assert.ok((eight.balanceHistory?.at(-1)?.outcome.leaks ?? 0) > 0);
+  assert.equal(nine.battle?.status, "defeat"); assert.ok((nine.balanceHistory?.at(-1)?.outcome.deaths ?? 0) > 0);
+});
+
+test("Cave Shadow wave punishes an unupgraded five-unit board but preserves a prepared answer", () => {
+  const run = (pieces: GameState["pieces"]) => {
+    let current: GameState = { ...makeInitialState(() => 0), wave: 5, level: pieces.length, gold: 15, pieces };
+    current = startWave(current).state;
+    for (let tick = 0; tick < 900 && current.battle?.status === "running"; tick += 1) current = advanceBattle(current);
+    return current;
+  };
+  const weak = run([
+    { id: "weak-f", characterId: "fichte", star: 1, slotId: "deploy-1" }, { id: "weak-s", characterId: "socrates", star: 1, slotId: "deploy-3" },
+    { id: "weak-e", characterId: "epicurus", star: 1, slotId: "deploy-8" }, { id: "weak-a", characterId: "aristotle", star: 1, slotId: "deploy-13" },
+    { id: "weak-d", characterId: "descartes", star: 1, slotId: "deploy-15" },
+  ]);
+  assert.equal(weak.battle?.status, "victory"); assert.ok(weak.coreHp < 100); assert.ok((weak.balanceHistory?.at(-1)?.outcome.deaths ?? 0) >= 1);
+  const prepared = run([
+    { id: "ready-f", characterId: "fichte", star: 2, slotId: "deploy-1" }, { id: "ready-h", characterId: "hobbes", star: 1, slotId: "deploy-3" },
+    { id: "ready-r", characterId: "rousseau", star: 1, slotId: "deploy-8" }, { id: "ready-e", characterId: "epicurus", star: 1, slotId: "deploy-10" },
+    { id: "ready-a", characterId: "aristotle", star: 2, slotId: "deploy-13" }, { id: "ready-s", characterId: "schelling", star: 1, slotId: "deploy-15" },
+  ]);
+  assert.equal(prepared.battle?.status, "victory"); assert.equal(prepared.coreHp, 100); assert.equal(prepared.balanceHistory?.at(-1)?.outcome.deaths, 0);
 });
 
 test("a starter defense with a ground blocker and highland coverage clears wave one", () => {
@@ -680,10 +941,15 @@ test("settled waves write a copyable balance report with economy, route and unit
   for (let tick = 0; tick < 350 && state.battle?.status === "running"; tick += 1) state = advanceBattle(state);
   const report = state.balanceHistory?.[0];
   assert.equal(report?.wave, 1); assert.equal(report?.success, true); assert.equal(report?.economy.refreshes, 1);
+  assert.equal(report?.economy.endGold, state.gold, "the report must not add settlement income twice");
   assert.equal(report?.routes.upper.spawned, 1); assert.equal(report?.routes.lower.spawned, 1);
+  assert.deepEqual(report?.outcome, { deaths: 0, leaks: 0, coreDamage: 0 });
   assert.ok(Object.values(report?.units ?? {}).some((unit) => unit.damage > 0 || unit.shielding > 0 || unit.blockedWeight > 0));
   const restored = migrateState(JSON.parse(serializeGameState(state)));
   assert.equal(restored.balanceHistory?.[0]?.wave, 1); assert.equal(restored.waveEconomy, undefined);
+
+  const casualty = advanceBattle({ ...makeInitialState(), pieces: [{ id: "fallen", characterId: "fichte", star: 1, slotId: "deploy-1", hp: 0, maxHp: 840 }], battle: running([]) });
+  assert.equal(casualty.balanceHistory?.[0]?.outcome.deaths, 1); assert.equal(casualty.balanceHistory?.[0]?.units.fallen.deaths, 1);
 });
 
 test("every legal pair of one-star philosophers clears the teaching wave without core loss", () => {
@@ -1009,7 +1275,7 @@ test("small synergies freeze at wave start and enlightenment agendas apply only 
   const pieces: GameState["pieces"] = [
     { id: "r", characterId: "rousseau", star: 1, slotId: "deploy-1" }, { id: "l", characterId: "locke", star: 1, slotId: "deploy-3" }, { id: "h", characterId: "hume", star: 1, slotId: "deploy-13" }, { id: "k", characterId: "kant", star: 1, slotId: "deploy-14" },
   ];
-  const prepared = chooseEnlightenmentAgendas({ ...makeInitialState(), gold: 10, pieces }, ["market", "education"]); assert.equal(prepared.ok, true);
+  const prepared = chooseEnlightenmentAgendas({ ...makeInitialState(), level: 4, gold: 10, pieces }, ["market", "education"]); assert.equal(prepared.ok, true);
   const started = startWave(prepared.state); assert.equal(started.state.gold, 11); assert.equal(started.state.xp, 2); assert.equal(started.state.battle?.traitSnapshot?.smallSynergyTiers.enlightenment, 4);
   assert.equal(chooseEnlightenmentAgendas(started.state, ["citizen"]).ok, false);
   const changed = { ...started.state, pieces: started.state.pieces.filter((piece) => piece.id !== "k") }; assert.equal(changed.battle?.traitSnapshot?.smallSynergyTiers.enlightenment, 4);

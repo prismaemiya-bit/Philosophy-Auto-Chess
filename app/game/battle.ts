@@ -70,7 +70,12 @@ export type CombatEffect = {
   message?: string;
 };
 
-export type UnitWaveStatistics = { characterId?: string; damage: number; damageTaken: number; healing: number; shielding: number; controlTime: number; blockedWeight: number; skillCasts: number; effectiveTargets: number; wastedCasts: number };
+export type UnitWaveStatistics = { characterId?: string; damage: number; damageTaken: number; healing: number; shielding: number; controlTime: number; blockedWeight: number; skillCasts: number; effectiveTargets: number; wastedCasts: number; deaths: number };
+export type PhilosopherKingCombatStatistics = {
+  pieceId: string; characterId: string; star: Piece["star"]; normalSlot?: Piece["slotId"];
+  throneBonus: { damage: number; healing: number; shielding: number };
+  barrier: { maxHp: number; damageTaken: number; blockedWeight: number; hits: number; broke: boolean };
+};
 export type WaveStatistics = {
   enemiesSpawned: number;
   enemiesDefeated: number;
@@ -78,6 +83,7 @@ export type WaveStatistics = {
   coreDamageBySource: Record<string, number>;
   routes: Record<SourceRouteId, { spawned: number; defeated: number; leaked: number }>;
   units: Record<string, UnitWaveStatistics>;
+  philosopherKing?: PhilosopherKingCombatStatistics;
 };
 
 export type BattleSummary = {
@@ -170,8 +176,26 @@ export const enemyTemplates: Record<EnemyKind, EnemyTemplate> = {
   boss: { name: "绝对精神", glyph: "☉", maxHp: 1450, speed: .009, coreDamage: 45, attack: 40, attackEvery: 9, reward: 10, weight: 3, className: "boss", description: "最终Boss；在 75% / 45% / 20% 生命依次触发固定阶段。" },
 };
 
+export const ENEMY_UNIT_PRESSURE = {
+  base: 2,
+  perWave: .5,
+  guardScale: 100,
+} as const;
+
+/**
+ * Enemy attacks are the only incoming source that reads the card's Guard stat.
+ * This keeps Guard useful without making low-wave flat subtraction immune, and
+ * leaves skill damage-reduction, shields and contract sharing as separate layers.
+ */
+export function enemyUnitDamage(baseAttack: number, wave: number, targetCharacterId: string, modeMultiplier = 1) {
+  const guard = Math.max(0, characterById[targetCharacterId]?.stats.guard ?? 0);
+  const pressure = ENEMY_UNIT_PRESSURE.base + Math.max(0, wave - 1) * ENEMY_UNIT_PRESSURE.perWave;
+  const guardMultiplier = ENEMY_UNIT_PRESSURE.guardScale / (ENEMY_UNIT_PRESSURE.guardScale + guard);
+  return Math.max(1, baseAttack * pressure * guardMultiplier * modeMultiplier);
+}
+
 const emptyRouteStatistics = () => ({ upper: { spawned: 0, defeated: 0, leaked: 0 }, lower: { spawned: 0, defeated: 0, leaked: 0 }, side: { spawned: 0, defeated: 0, leaked: 0 } });
-const emptyUnitStatistics = (characterId?: string): UnitWaveStatistics => ({ characterId, damage: 0, damageTaken: 0, healing: 0, shielding: 0, controlTime: 0, blockedWeight: 0, skillCasts: 0, effectiveTargets: 0, wastedCasts: 0 });
+const emptyUnitStatistics = (characterId?: string): UnitWaveStatistics => ({ characterId, damage: 0, damageTaken: 0, healing: 0, shielding: 0, controlTime: 0, blockedWeight: 0, skillCasts: 0, effectiveTargets: 0, wastedCasts: 0, deaths: 0 });
 const normalizeUnitStatistics = (value?: Partial<UnitWaveStatistics>): UnitWaveStatistics => ({ ...emptyUnitStatistics(value?.characterId), ...value });
 const emptyWaveStatistics = (): WaveStatistics => ({ enemiesSpawned: 0, enemiesDefeated: 0, enemiesLeaked: 0, coreDamageBySource: {}, routes: emptyRouteStatistics(), units: {} });
 const normalizeWaveStatistics = (value?: Partial<WaveStatistics>): WaveStatistics => ({
@@ -179,6 +203,11 @@ const normalizeWaveStatistics = (value?: Partial<WaveStatistics>): WaveStatistic
   coreDamageBySource: value?.coreDamageBySource ?? {},
   routes: { ...emptyRouteStatistics(), ...(value?.routes ?? {}) },
   units: Object.fromEntries(Object.entries(value?.units ?? {}).map(([id, unit]) => [id, normalizeUnitStatistics(unit)])),
+  philosopherKing: value?.philosopherKing ? {
+    ...value.philosopherKing,
+    throneBonus: { damage: value.philosopherKing.throneBonus?.damage ?? 0, healing: value.philosopherKing.throneBonus?.healing ?? 0, shielding: value.philosopherKing.throneBonus?.shielding ?? 0 },
+    barrier: { maxHp: value.philosopherKing.barrier?.maxHp ?? 0, damageTaken: value.philosopherKing.barrier?.damageTaken ?? 0, blockedWeight: value.philosopherKing.barrier?.blockedWeight ?? 0, hits: value.philosopherKing.barrier?.hits ?? 0, broke: value.philosopherKing.barrier?.broke === true },
+  } : undefined,
 });
 
 const routeForSpawn = (index: number): SourceRouteId => (["upper", "lower", "side"] as const)[index % 3];
@@ -201,7 +230,7 @@ const buildBalanceReport = (state: GameState, pieces: Piece[], summary: BattleSu
     economy: {
       ...ledger,
       startGold: state.waveCheckpoint?.gold ?? state.gold,
-      endGold: summary.success ? state.gold + summary.totalGold : state.gold,
+      endGold: state.gold,
       baseIncome: summary.baseIncome,
       perfectBonus: summary.perfectBonus,
       interest: summary.interest,
@@ -219,6 +248,16 @@ const buildBalanceReport = (state: GameState, pieces: Piece[], summary: BattleSu
     },
     routes: summary.statistics.routes,
     units: summary.statistics.units,
+    outcome: {
+      deaths: Object.values(summary.statistics.units).reduce((sum, unit) => sum + unit.deaths, 0),
+      leaks: summary.statistics.enemiesLeaked,
+      coreDamage: summary.coreDamage,
+    },
+    philosopherKing: summary.statistics.philosopherKing ? (() => {
+      const king = summary.statistics.philosopherKing!;
+      const output = summary.statistics.units[king.pieceId] ?? emptyUnitStatistics(king.characterId);
+      return { ...king, output: { damage: output.damage, healing: output.healing, shielding: output.shielding } };
+    })() : undefined,
     synergyTriggers: summary.synergyTriggers,
     bossPhases: summary.bossPhases.map((phase) => ({ id: phase.id, name: phase.name, triggeredAt: phase.triggeredAt })),
     coreDamageBySource: summary.statistics.coreDamageBySource,
@@ -277,6 +316,32 @@ function initializePiece(piece: Piece, resetWaveEnergy = false) {
   } satisfies Piece;
 }
 
+/**
+ * Death removes a unit from the active combat collection so it cannot keep
+ * attacking, blocking or receiving effects. The purchased roster itself is
+ * durable: after a successful wave, rebuild it from the preparation checkpoint
+ * and only carry combat fields for units that survived this wave.
+ */
+function restoreRosterAfterVictory(preparedPieces: Piece[], combatPieces: Piece[]) {
+  const combatById = new Map(combatPieces.map((piece) => [piece.id, piece]));
+  return preparedPieces.filter((piece) => characterById[piece.characterId]).map((prepared) => {
+    const restored = combatById.get(prepared.id) ?? initializePiece(prepared, true);
+    const maxHp = restored.maxHp ?? characterById[prepared.characterId].stats.resolve * prepared.star;
+    return {
+      ...restored,
+      characterId: prepared.characterId,
+      star: prepared.star,
+      slotId: prepared.slotId,
+      throneReturnSlot: prepared.throneReturnSlot,
+      maxHp,
+      hp: maxHp,
+      shield: 0,
+      contractGroupId: undefined,
+      contractUntil: 0,
+    } satisfies Piece;
+  });
+}
+
 export function startWave(state: GameState) {
   if (state.coreHp <= 0) return { state, message: "哲人之石已失守，请重试本波。", ok: false };
   if (state.wave > MAX_WAVES) return { state, message: "十波关卡已经完成。", ok: false };
@@ -320,7 +385,9 @@ export function startWave(state: GameState) {
   const definition = waveDefinition(state.wave);
   const battle: BattleState = {
     ...idleBattle(), status: "running", phase: "combat", spawnRemaining: [...definition.enemies], structures: royalBarrier ? [royalBarrier] : [],
-    traitSnapshot: snapshot, phenomenologyCharges: snapshot.smallSynergyTiers.phenomenology >= 3 ? 2 : snapshot.smallSynergyTiers.phenomenology >= 2 ? 1 : 0, experienceGained: agendas.includes("education") ? 2 : 0, lockedInterest: interestForGold(state.gold), synergyTriggers: Object.fromEntries(agendas.map((agenda) => [`enlightenment:${agenda}`, 1])), lastEvent: `第 ${state.wave} 波开始：${definition.title}`,
+    traitSnapshot: snapshot, phenomenologyCharges: snapshot.smallSynergyTiers.phenomenology >= 3 ? 2 : snapshot.smallSynergyTiers.phenomenology >= 2 ? 1 : 0, experienceGained: agendas.includes("education") ? 2 : 0, lockedInterest: interestForGold(state.gold), synergyTriggers: Object.fromEntries(agendas.map((agenda) => [`enlightenment:${agenda}`, 1])),
+    statistics: philosopherKing && kingCard && royalBarrier ? { ...emptyWaveStatistics(), philosopherKing: { pieceId: philosopherKing.id, characterId: philosopherKing.characterId, star: philosopherKing.star, normalSlot: philosopherKing.throneReturnSlot, throneBonus: { damage: 0, healing: 0, shielding: 0 }, barrier: { maxHp: royalBarrier.maxHp ?? 0, damageTaken: 0, blockedWeight: 0, hits: 0, broke: false } } } : emptyWaveStatistics(),
+    lastEvent: `第 ${state.wave} 波开始：${definition.title}`,
   };
   const waveCheckpoint = {
     gold: state.gold, level: state.level, xp: state.xp, coreHp: state.coreHp,
@@ -336,8 +403,18 @@ export function retryWave(state: GameState) {
   const checkpoint = state.waveCheckpoint;
   const pieces = (checkpoint?.pieces ?? state.pieces).filter((piece) => characterById[piece.characterId]).map((piece) => ({ ...piece }));
   return {
-    state: { ...state, gold: checkpoint?.gold ?? state.gold, shop: checkpoint ? [...checkpoint.shop] : state.shop, pieces, preparationPlan: checkpoint?.preparationPlan ?? state.preparationPlan, coreHp: 100, battle: { ...idleBattle(), lastEvent: `第 ${state.wave} 波准备重试。` } },
-    message: "哲人之石已修复，阵容恢复到本波开始前。", ok: true,
+    state: {
+      ...state,
+      gold: checkpoint?.gold ?? state.gold,
+      level: checkpoint?.level ?? state.level,
+      xp: checkpoint?.xp ?? state.xp,
+      shop: checkpoint ? [...checkpoint.shop] : state.shop,
+      pieces,
+      preparationPlan: checkpoint?.preparationPlan ?? state.preparationPlan,
+      coreHp: checkpoint?.coreHp ?? 100,
+      battle: { ...idleBattle(), lastEvent: `第 ${state.wave} 波准备重试。` },
+    },
+    message: "阵容与哲人之石已恢复到本波开始前。", ok: true,
   };
 }
 
@@ -427,7 +504,15 @@ export function advanceBattle(state: GameState): GameState {
   });
   const effects = battle.effects.map((effect) => ({ ...effect, age: effect.age + 1 })).filter((effect) => effect.age < 5);
   let enemies = battle.enemies.map((enemy) => {
-    const copy = { ...enemy };
+    // A tick may update evidence, logic hit ledgers and boss phase arrays in
+    // place. Clone those nested records so advancing never changes the input
+    // GameState retained by React, a replay tool or a deterministic test.
+    const copy: Enemy = {
+      ...enemy,
+      evidence: enemy.evidence ? { count: enemy.evidence.count, lastHitBySource: { ...enemy.evidence.lastHitBySource } } : undefined,
+      logicHits: enemy.logicHits ? { ...enemy.logicHits } : undefined,
+      bossPhasesTriggered: enemy.bossPhasesTriggered ? [...enemy.bossPhasesTriggered] : undefined,
+    };
     if ((copy.phaseShieldUntil ?? 0) > 0 && (copy.phaseShieldUntil ?? 0) <= gameTime) {
       copy.shield = Math.max(0, (copy.shield ?? 0) - Math.min(copy.shield ?? 0, copy.phaseShieldAmount ?? 0));
       copy.phaseShieldAmount = 0; copy.phaseShieldUntil = 0;
@@ -444,6 +529,11 @@ export function advanceBattle(state: GameState): GameState {
     coreDamageBySource: { ...priorStatistics.coreDamageBySource },
     routes: Object.fromEntries(Object.entries(priorStatistics.routes).map(([id, value]) => [id, { ...value }])) as WaveStatistics["routes"],
     units: Object.fromEntries(Object.entries(priorStatistics.units).map(([id, value]) => [id, { ...value }])),
+    philosopherKing: priorStatistics.philosopherKing ? {
+      ...priorStatistics.philosopherKing,
+      throneBonus: { ...priorStatistics.philosopherKing.throneBonus },
+      barrier: { ...priorStatistics.philosopherKing.barrier },
+    } : undefined,
   };
   const unitStatistics = (id: string) => statistics.units[id] ??= emptyUnitStatistics(pieces.find((piece) => piece.id === id)?.characterId);
   const routeStatistics = (route: SourceRouteId) => statistics.routes[route] ??= { spawned: 0, defeated: 0, leaked: 0 };
@@ -455,7 +545,7 @@ export function advanceBattle(state: GameState): GameState {
     queue.enqueue({ id: `commune-expire-slow-${structure.id}`, kind: "slow", targetKind: "position", position: structure.point, radius: 18, duration: 2, potency: .35, copyable: false, derivedEffect: true });
   });
   let delayedDevices = [...(battle.delayedDevices ?? [])];
-  const psychoanalysis = { ...(battle.psychoanalysis ?? {}) };
+  const psychoanalysis = Object.fromEntries(Object.entries(battle.psychoanalysis ?? {}).map(([targetId, record]) => [targetId, { ...record }])) as Record<string, PsychoanalysisRecord>;
   Object.values(psychoanalysis).filter((record) => record.expiresAt <= gameTime).forEach((record) => {
     queue.enqueue({ id: `psychoanalysis-expire-${record.targetId}-${tick}`, kind: "damage", sourceId: record.sourceId, targetKind: "enemy", targetId: record.targetId, amount: record.stored * .5, copyable: false, derivedEffect: true });
     delete psychoanalysis[record.targetId];
@@ -494,7 +584,7 @@ export function advanceBattle(state: GameState): GameState {
     const source = profile.sourceId ? pieces.find((piece) => piece.id === profile.sourceId) : undefined;
     if (!source) return;
     const index = delayedDevices.findIndex((device) => device.executeAt > gameTime && device.sourceId !== source.id && !device.copiedEffect);
-    if (index >= 0) delayedDevices[index] = { ...delayedDevices[index], copiedEffect: { ...profile, amount: profile.amount === undefined ? undefined : profile.amount * .6, potency: profile.potency === undefined ? undefined : profile.potency * .6, duration: profile.duration === undefined ? undefined : profile.duration * .6, derivedEffect: true, copyable: false } };
+    if (index >= 0) delayedDevices[index] = { ...delayedDevices[index], copiedEffect: { ...profile, amount: profile.amount === undefined ? undefined : profile.amount * .6, potency: profile.potency === undefined ? undefined : profile.potency * .6, duration: profile.duration === undefined ? undefined : profile.duration * .6, derivedEffect: true, copyable: false, throneBonusAmount: undefined } };
   };
 
   const recordBritishEvidence = (profile: EffectProfile, target: Enemy) => {
@@ -550,8 +640,8 @@ export function advanceBattle(state: GameState): GameState {
       const pending = [...ready]; ready = [];
       while (pending.length) {
         const rawProfile = pending.shift()!;
-        const amplify = Boolean(snapshot.philosopherKingId) && rawProfile.sourceId === snapshot.philosopherKingId && !rawProfile.derivedEffect && ["damage", "heal", "shield"].includes(rawProfile.kind);
-        const profile = amplify && rawProfile.amount !== undefined ? { ...rawProfile, amount: rawProfile.amount * 1.1 } : rawProfile;
+        const amplify = Boolean(snapshot.philosopherKingId) && rawProfile.sourceId === snapshot.philosopherKingId && !rawProfile.derivedEffect && rawProfile.throneBonusAmount === undefined && ["damage", "heal", "shield"].includes(rawProfile.kind);
+        const profile = amplify && rawProfile.amount !== undefined ? { ...rawProfile, amount: rawProfile.amount * 1.1, throneBonusAmount: rawProfile.amount * .1 } : rawProfile;
         if (profile.targetKind === "position") {
           if (profile.kind === "spawn" && profile.tags?.includes("revolution-structure") && profile.position) {
             const capacity = Math.max(1, Math.floor(profile.amount ?? 2));
@@ -579,6 +669,8 @@ export function advanceBattle(state: GameState): GameState {
             const multiplier = 1 + Math.max(statusManager.potency(target.id, "armor-break", gameTime), (target.armorBreakTicks ?? 0) > 0 ? .3 : 0);
             const amount = finiteNonNegative((profile.amount ?? 0) * multiplier); const absorbed = Math.min(target.shield ?? 0, amount); target.shield = Math.max(0, (target.shield ?? 0) - absorbed); if ((target.phaseShieldAmount ?? 0) > 0) target.phaseShieldAmount = Math.max(0, (target.phaseShieldAmount ?? 0) - absorbed); const healthDamage = amount - absorbed; target.hp -= healthDamage;
             if (profile.sourceId && pieces.some((piece) => piece.id === profile.sourceId)) unitStatistics(profile.sourceId).damage += amount;
+            const kingStatistics = statistics.philosopherKing;
+            if (kingStatistics && profile.sourceId === kingStatistics.pieceId) kingStatistics.throneBonus.damage += finiteNonNegative((profile.throneBonusAmount ?? 0) * multiplier);
             const analysis = psychoanalysis[target.id]; if (analysis && !profile.derivedEffect) analysis.stored = Math.min(999, analysis.stored + amount * .35);
             recordBritishEvidence(profile, target); recordSmallSynergy(profile, target); recordCopyableEffect(profile); visual({ ...profile, targetId: target.id }, amount); triggerBossPhases(target);
           } else if (profile.kind === "shield") {
@@ -620,10 +712,15 @@ export function advanceBattle(state: GameState): GameState {
           if (!target) continue;
           if (profile.kind === "heal") {
             const before = target.hp ?? target.maxHp ?? 0; const heal = finiteNonNegative(profile.amount ?? 0); const after = Math.min(target.maxHp ?? before, before + heal); target.hp = after;
+            const baseAfter = Math.min(target.maxHp ?? before, before + Math.max(0, heal - finiteNonNegative(profile.throneBonusAmount ?? 0)));
+            const kingStatistics = statistics.philosopherKing;
+            if (kingStatistics && profile.sourceId === kingStatistics.pieceId) kingStatistics.throneBonus.healing += Math.max(0, after - baseAfter);
             const excess = Math.max(0, before + heal - after); if (excess > 0 && !profile.derivedEffect && snapshot.smallSynergyTiers.eudaimonia >= 2) { target.shield = Math.min((target.maxHp ?? 0) * .15, (target.shield ?? 0) + excess); incrementSynergy("eudaimonia:overheal"); }
             if (after > before) { visual({ ...profile, targetId: target.id }, after - before); if (profile.sourceId && pieces.some((piece) => piece.id === profile.sourceId)) unitStatistics(profile.sourceId).healing += after - before; } recordCopyableEffect(profile);
           } else if (profile.kind === "shield") {
             const shield = finiteNonNegative(profile.amount ?? 0); target.shield = (target.shield ?? 0) + shield; if (profile.sourceId && pieces.some((piece) => piece.id === profile.sourceId)) unitStatistics(profile.sourceId).shielding += shield; visual({ ...profile, targetId: target.id }); recordCopyableEffect(profile);
+            const kingStatistics = statistics.philosopherKing;
+            if (kingStatistics && profile.sourceId === kingStatistics.pieceId) kingStatistics.throneBonus.shielding += finiteNonNegative(profile.throneBonusAmount ?? 0);
           } else if (profile.kind === "energy") {
             target.energy = Math.min(target.maxEnergy ?? 100, finiteNonNegative((target.energy ?? 0) + (profile.amount ?? 0)));
           } else if (profile.kind === "damage") {
@@ -664,6 +761,7 @@ export function advanceBattle(state: GameState): GameState {
             }
           } else if (profile.kind === "death") {
             const current = pieces.find((piece) => piece.id === target!.id); if (!current || (current.hp ?? 0) > 0) continue;
+            unitStatistics(current.id).deaths += 1;
             pieces = pieces.filter((piece) => piece.id !== current.id); statusManager.removeTarget(current.id);
           }
         }
@@ -692,6 +790,10 @@ export function advanceBattle(state: GameState): GameState {
   // Recompute blocking before movement so expired structures or lost capacity release enemies immediately.
   enemies = resolveBlocking(enemies, pieces, structures, gameTime);
   enemies.filter((enemy) => enemy.blockedBy && !enemy.blockedBy.startsWith("structure:")).forEach((enemy) => { unitStatistics(enemy.blockedBy!).blockedWeight += enemy.weight * FIXED_STEP_SECONDS; });
+  if (statistics.philosopherKing) {
+    const royalBarrierId = structures.find((structure) => structure.kind === "royal-barrier" && structure.sourceId === statistics.philosopherKing!.pieceId)?.id;
+    if (royalBarrierId) statistics.philosopherKing.barrier.blockedWeight += enemies.filter((enemy) => enemy.blockedBy === `structure:${royalBarrierId}`).reduce((sum, enemy) => sum + enemy.weight * FIXED_STEP_SECONDS, 0);
+  }
   enemies = enemies.map((enemy) => {
     const legacyControl = (enemy.stunTicks ?? 0) > 0; const paused = legacyControl || statusManager.has(enemy.id, "stun", gameTime) || statusManager.has(enemy.id, "pause", gameTime);
     const slow = Math.max((enemy.slowTicks ?? 0) > 0 ? .58 : 0, statusManager.potency(enemy.id, "slow", gameTime));
@@ -888,7 +990,7 @@ export function advanceBattle(state: GameState): GameState {
     const current = Math.max(0, (enemyCooldowns[enemy.id] ?? 0) - 1); const target = pieces.find((piece) => piece.id === enemy.blockedBy && (piece.hp ?? 0) > 0);
     if (target && current === 0) {
       const analysis = psychoanalysis[enemy.id]; if (analysis && analysis.stored > 0) { enqueue({ id: `psychoanalysis-cast-${tick}-${enemy.id}`, kind: "damage", sourceId: analysis.sourceId, targetKind: "enemy", targetId: enemy.id, amount: analysis.stored, copyable: false, derivedEffect: true }); delete psychoanalysis[enemy.id]; }
-      const attackPressure = 1 + Math.max(0, state.wave - 1) * .18; let amount = enemyTemplates[enemy.kind].attack * attackPressure; if ((target.suspendShield ?? 0) > 0 && enemy.kind === "caster") { target.suspendShield = Math.max(0, (target.suspendShield ?? 0) - 1); amount = 0; }
+      let amount = enemyUnitDamage(enemyTemplates[enemy.kind].attack, state.wave, target.characterId); if ((target.suspendShield ?? 0) > 0 && enemy.kind === "caster") { target.suspendShield = Math.max(0, (target.suspendShield ?? 0) - 1); amount = 0; }
       const attackRatePressure = 1 + Math.max(0, state.wave - 1) * .055;
       enqueue({ id: `enemy-hit-${tick}-${enemy.id}`, kind: "damage", sourceId: enemy.id, targetKind: "ally", targetId: target.id, amount, copyable: false, tags: ["enemy-hit"] }); enemyCooldowns[enemy.id] = Math.max(3, Math.round(enemyTemplates[enemy.kind].attackEvery / attackRatePressure));
     } else enemyCooldowns[enemy.id] = current;
@@ -902,6 +1004,12 @@ export function advanceBattle(state: GameState): GameState {
       const amount = Math.max(1, enemyTemplates[enemy.kind].attack * pressure - (structure.defense ?? 0));
       const hp = Math.max(0, (structure.hp ?? 0) - amount);
       structures[index] = { ...structure, hp };
+      const kingStatistics = statistics.philosopherKing;
+      if (kingStatistics && kingStatistics.pieceId === structure.sourceId) {
+        kingStatistics.barrier.damageTaken += Math.min(structure.hp ?? 0, amount);
+        kingStatistics.barrier.hits += 1;
+        if (hp <= 0) kingStatistics.barrier.broke = true;
+      }
       effects.push({ id: `barrier-${hp > 0 ? "hit" : "break"}-${tick}-${enemy.id}`, type: hp > 0 ? "barrierHit" : "barrierBreak", enemyId: enemy.id, amount: Math.round(amount), age: 0, message: hp > 0 ? "王城屏障承受攻击" : "王城屏障已破碎" });
       enemyCooldowns[enemy.id] = Math.max(3, Math.round(enemyTemplates[enemy.kind].attackEvery / (1 + Math.max(0, state.wave - 1) * .055)));
     } else enemyCooldowns[enemy.id] = current;
@@ -915,9 +1023,8 @@ export function advanceBattle(state: GameState): GameState {
       .filter((piece) => isDeploySlot(piece.slotId) && characterById[piece.characterId]?.terrain === "highland" && (piece.hp ?? 0) > 0)
       .sort((left, right) => ((left.hp ?? 0) / Math.max(1, left.maxHp ?? characterById[left.characterId].stats.resolve)) - ((right.hp ?? 0) / Math.max(1, right.maxHp ?? characterById[right.characterId].stats.resolve)) || left.id.localeCompare(right.id))[0];
     if (target && current === 0) {
-      const attackPressure = 1 + Math.max(0, state.wave - 1) * .18;
       const rangedMultiplier = enemy.kind === "caster" ? .72 : .56;
-      let amount = enemyTemplates[enemy.kind].attack * attackPressure * rangedMultiplier;
+      let amount = enemyUnitDamage(enemyTemplates[enemy.kind].attack, state.wave, target.characterId, rangedMultiplier);
       if ((target.suspendShield ?? 0) > 0 && enemy.kind === "caster") { target.suspendShield = Math.max(0, (target.suspendShield ?? 0) - 1); amount = 0; }
       enqueue({ id: `enemy-ranged-${tick}-${enemy.id}`, kind: "damage", sourceId: enemy.id, targetKind: "ally", targetId: target.id, amount, copyable: false, tags: ["enemy-hit", "ranged-pressure"] });
       const intervalMultiplier = enemy.kind === "caster" ? 1.35 : 1.8;
@@ -957,7 +1064,7 @@ export function advanceBattle(state: GameState): GameState {
     phase = "settlement";
     if (wave === MAX_WAVES) { status = "complete"; lastEvent = "十波防守完成。"; }
     else { status = "victory"; wave += 1; lastEvent = `第 ${state.wave} 波已清剿，获得 ${totalGold} 金币。`; }
-    pieces = pieces.map((piece) => ({ ...piece, hp: piece.maxHp ?? characterById[piece.characterId].stats.resolve * piece.star, shield: 0, contractGroupId: undefined, contractUntil: 0 }));
+    pieces = restoreRosterAfterVictory(state.waveCheckpoint?.pieces ?? pieces, pieces);
   }
 
   const shop = summary?.success ? pickShop(level) : state.shop;

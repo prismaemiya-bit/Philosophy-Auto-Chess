@@ -179,11 +179,13 @@ async function main() {
 
     await evaluate(`(() => { const source = document.querySelector('[data-slot="${openingDeploySlot}"] .unit-card'); const transfer = new DataTransfer(); source.dispatchEvent(new DragEvent('dragstart', { bubbles: true, cancelable: true, dataTransfer: transfer })); window.__ideaDragData = transfer; })()`);
     await waitSelector(".shop--sell-target");
-    const placementGuidance = await evaluate(`(() => { const slots = [...document.querySelectorAll('.map-field.is-dragging .deploy-grid>.slot.drop-allowed')]; const emptySlot = document.querySelector('.map-field.is-dragging .deploy-grid>.slot.drop-allowed:not(.occupied)'); const marker = emptySlot && getComputedStyle(emptySlot, '::before'); const gridMarker = document.querySelector('.operation-grid .map-tile.drop-allowed'); return { count: slots.length, display: marker?.display, borderWidth: marker?.borderTopWidth, gridOpacity: gridMarker ? getComputedStyle(gridMarker).opacity : '0' }; })()`);
+    const placementGuidance = await evaluate(`(() => { const slots = [...document.querySelectorAll('.map-field.is-dragging .deploy-grid>.slot.drop-allowed')]; const emptySlot = document.querySelector('.map-field.is-dragging .deploy-grid>.slot.drop-allowed:not(.occupied)'); const marker = emptySlot && getComputedStyle(emptySlot, '::before'); const gridMarker = document.querySelector('.operation-grid .map-tile.drop-allowed'); const art = getComputedStyle(document.querySelector('.map-art')); return { count: slots.length, display: marker?.display, borderWidth: marker?.borderTopWidth, gridOpacity: gridMarker ? getComputedStyle(gridMarker).opacity : '0', background: art.backgroundImage, filter: art.filter }; })()`);
     assert.ok(placementGuidance.count >= 8, "dragging must expose every legal frozen deployment anchor");
     assert.equal(placementGuidance.display, "block", "legal deployment anchors need a visible marker");
     assert.equal(placementGuidance.borderWidth, "1px", "placement guidance should use a restrained metallic mask rather than an oversized glow");
     assert.equal(placementGuidance.gridOpacity, "0", "the imprecise 16x10 placement overlay must stay hidden");
+    assert.match(placementGuidance.background, /philosophy-map-final-v1/, "the supplied final map must be the active battlefield paint layer");
+    assert.match(placementGuidance.filter, /brightness\(0\.56\)/, "dragging must dim the painted map beneath legal placement anchors");
     await capture("placement-highlight-1920x1080.png");
     await evaluate(`(() => { const target = document.querySelector('.shop--sell-target'); const transfer = window.__ideaDragData; target.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: transfer })); target.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: transfer })); })()`);
     await waitFor(async () => !(await exists(`[data-slot="${openingDeploySlot}"] .unit-card`)), "dragged unit to be sold");
@@ -195,7 +197,26 @@ async function main() {
     await click(".bench .unit-card");
     await click(`[data-slot="${secondDeploySlot}"]`);
     await click(".start-wave");
+    await waitSelector(".wave-route-cue");
+    const openingRouteCue = await evaluate(`(() => ({ label: document.querySelector('.wave-route-cue')?.textContent, routes: document.querySelectorAll('.route-signal').length, running: Boolean(document.querySelector('.tempo-controls')) }))()`);
+    assert.ok(openingRouteCue.label?.includes("A 路") && openingRouteCue.label?.includes("B 路"), "the teaching wave must preview its two deterministic entrances");
+    assert.equal(openingRouteCue.routes, 2, "route warning count must match the wave's round-robin spawn routes");
+    assert.equal(openingRouteCue.running, false, "route warning must appear before the combat loop starts");
+    await capture("wave-route-warning-1920x1080.png");
     await waitSelector(".tempo-controls");
+    await waitSelector(".wave-toast.expanded");
+    const clearOverlay = await evaluate(`(() => { const overlay = document.querySelector('.wave-toast.expanded'); const rect = overlay?.getBoundingClientRect(); const map = document.querySelector('.map-field')?.getBoundingClientRect(); return { text: overlay?.textContent, width: rect?.width, height: rect?.height, mapWidth: map?.width, mapHeight: map?.height }; })()`);
+    assert.ok(clearOverlay.text?.includes("第 1 波肃清"), "wave settlement must announce the cleared wave");
+    assert.ok(Math.abs(clearOverlay.width - clearOverlay.mapWidth) <= 2 && Math.abs(clearOverlay.height - clearOverlay.mapHeight) <= 2, `wave settlement must cover the battlefield at the same size as the final victory sequence: ${JSON.stringify(clearOverlay)}`);
+    await capture("wave-clear-overlay-1920x1080.png");
+    await waitSelector(".wave-toast.collapsed");
+    await click(".shop-actions button:first-child");
+    await waitSelector(".shop-action-feedback.xp");
+    assert.ok((await evaluate("document.querySelector('.shop-action-feedback.xp')?.textContent ?? ''")).includes("经验"), "buying experience must produce local visual feedback");
+    await click(".shop-actions button:last-child");
+    assert.equal(await exists(".shop-grid.is-refreshing"), true, "refreshing must animate the replacement shop cards");
+    assert.equal(await exists(".shop-action-feedback.refresh"), false, "refreshing must not add redundant floating copy");
+    await capture("economy-feedback-1920x1080.png");
 
     await reset();
     await applyLineup("descartes,rousseau,sartre,foucault");

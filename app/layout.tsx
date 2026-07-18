@@ -4,9 +4,10 @@ import "./game/combat-ui.css";
 import "./game/combat-ui-overrides.css";
 import "./game/drag-safety.css";
 import "./game/map-art.css";
+import releaseInfo from "../release-info.json";
 
 export const metadata: Metadata = {
-  title: "往哲荣耀 · Philosophy Auto Chess · V0.1 Demo",
+  title: `${releaseInfo.productName} · ${releaseInfo.englishName} · ${releaseInfo.displayVersion} · ${releaseInfo.developer}`,
   description: "固定路线防守与自走棋经济的策略游戏原型。",
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
 };

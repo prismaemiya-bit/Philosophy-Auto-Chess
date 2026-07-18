@@ -1,12 +1,13 @@
 import { characters } from "./characters";
 import type { BattleState } from "./battle";
 import type { EnlightenmentAgenda, PreparationPlan, ResearchChoice, RevolutionNodeId, SourceRouteId } from "./combat-core";
-import { DEPLOYMENT_SLOT_IDS, slotTerrain } from "./positions";
+import { DEPLOYMENT_SLOT_IDS, slotTerrain, type DeploymentSlotId } from "./positions";
 
-export const BENCH_SLOTS = Array.from({ length: 9 }, (_, i) => `bench-${i + 1}`);
-export const DEPLOY_SLOTS = [...DEPLOYMENT_SLOT_IDS];
+export const BENCH_SLOTS = ["bench-1", "bench-2", "bench-3", "bench-4", "bench-5", "bench-6", "bench-7", "bench-8", "bench-9"] as const;
+export type BenchSlotId = (typeof BENCH_SLOTS)[number];
+export const DEPLOY_SLOTS = [...DEPLOYMENT_SLOT_IDS] as const;
 export const THRONE_SLOT = "throne-1" as const;
-export type SlotId = (typeof BENCH_SLOTS)[number] | (typeof DEPLOY_SLOTS)[number] | typeof THRONE_SLOT;
+export type SlotId = BenchSlotId | DeploymentSlotId | typeof THRONE_SLOT;
 export type Piece = { id: string; characterId: string; star: 1 | 2 | 3; slotId: SlotId; throneReturnSlot?: SlotId; hp?: number; maxHp?: number; energy?: number; maxEnergy?: number; shield?: number; blockBonus?: number; blockBonusTicks?: number; damageReduction?: number; damageReductionTicks?: number; tauntTicks?: number; empoweredSkill?: boolean; sublationEchoReady?: boolean; nearDeathUsed?: boolean; lastStandConsumed?: boolean; lastStandCharges?: number; phenomenologyUsed?: boolean; invulnerableTicks?: number; invulnerableUntil?: number; suspendShield?: number; attackSpeedTicks?: number; casts?: number; inductionTargetId?: string; inductionHits?: number; contractGroupId?: string; contractUntil?: number };
 export type WaveCheckpoint = { gold: number; level: number; xp: number; coreHp: number; shop: Array<string | null>; pieces: Piece[]; preparationPlan?: PreparationPlan };
 export type EconomyLedger = { purchasesGold: number; refreshes: number; xpPurchases: number; researchGold: number };
@@ -16,11 +17,26 @@ export type BalanceWaveReport = {
   progress: { level: number; xp: number; deployed: number; rosterValue: number; oneStar: number; twoStar: number; threeStar: number };
   routes: Record<SourceRouteId, { spawned: number; defeated: number; leaked: number }>;
   units: Record<string, import("./battle").UnitWaveStatistics>;
+  outcome: { deaths: number; leaks: number; coreDamage: number };
+  philosopherKing?: {
+    pieceId: string; characterId: string; star: Piece["star"]; normalSlot?: SlotId;
+    output: { damage: number; healing: number; shielding: number };
+    throneBonus: { damage: number; healing: number; shielding: number };
+    barrier: { maxHp: number; damageTaken: number; blockedWeight: number; hits: number; broke: boolean };
+  };
   synergyTriggers: Record<string, number>;
   bossPhases: Array<{ id: string; name: string; triggeredAt: number }>;
   coreDamageBySource: Record<string, number>;
 };
 export const SAVE_VERSION = 6;
+export class UnsupportedSaveVersionError extends Error {
+  readonly saveVersion: number;
+  constructor(saveVersion: number) {
+    super(`Save version ${saveVersion} is newer than supported version ${SAVE_VERSION}.`);
+    this.name = "UnsupportedSaveVersionError";
+    this.saveVersion = saveVersion;
+  }
+}
 export type GameState = { saveVersion: number; gold: number; level: number; xp: number; wave: number; coreHp: number; shop: Array<string | null>; pieces: Piece[]; preparationPlan: PreparationPlan; campaignElapsedSeconds?: number; balanceHistory?: BalanceWaveReport[]; waveEconomy?: EconomyLedger; battle?: BattleState; waveCheckpoint?: WaveCheckpoint };
 export type PersistedGameState = Omit<GameState, "battle" | "waveCheckpoint" | "pieces"> & { pieces: Array<Pick<Piece, "id" | "characterId" | "star" | "slotId" | "throneReturnSlot">> };
 
@@ -35,9 +51,11 @@ const legacyCharacterIds: Record<string, string> = {
   archivist: "hegel", questioner: "fichte", forger: "schelling", wayfarer: "kant",
   dialectician: "plato", oracle: "husserl", sentinel: "aristotle", inquisitor: "heidegger",
 };
-export const isDeploySlot = (slotId: SlotId) => slotId.startsWith("deploy-");
-export const isThroneSlot = (slotId: SlotId) => slotId === THRONE_SLOT;
-export const isFieldedSlot = (slotId: SlotId) => isDeploySlot(slotId) || isThroneSlot(slotId);
+const slotIds = new Set<string>([...BENCH_SLOTS, ...DEPLOY_SLOTS, THRONE_SLOT]);
+export const isSlotId = (slotId: unknown): slotId is SlotId => typeof slotId === "string" && slotIds.has(slotId);
+export const isDeploySlot = (slotId: unknown): slotId is DeploymentSlotId => typeof slotId === "string" && slotId.startsWith("deploy-") && slotIds.has(slotId);
+export const isThroneSlot = (slotId: unknown): slotId is typeof THRONE_SLOT => slotId === THRONE_SLOT;
+export const isFieldedSlot = (slotId: unknown): slotId is DeploymentSlotId | typeof THRONE_SLOT => isDeploySlot(slotId) || isThroneSlot(slotId);
 export const hasPhilosopherKingUnlock = (pieces: Piece[]) => pieces.some((piece) => isFieldedSlot(piece.slotId) && piece.characterId === "plato" && piece.star >= 2);
 export const xpRequired = (level: number) => XP_REQUIREMENTS[Math.min(level, XP_REQUIREMENTS.length - 1)] ?? 28;
 export const maxDeployForLevel = (level: number) => DEPLOY_CAPACITY[Math.min(MAX_LEVEL, Math.max(1, level))] ?? 8;
@@ -164,6 +182,10 @@ export function chooseEnlightenmentAgendas(state: GameState, agendas: Enlightenm
 export function migrateState(raw: unknown): GameState {
   if (!raw || typeof raw !== "object") return makeInitialState();
   const incoming = raw as Partial<GameState>;
+  const incomingVersion = (incoming as { saveVersion?: unknown }).saveVersion;
+  if (typeof incomingVersion === "number" && Number.isFinite(incomingVersion) && incomingVersion > SAVE_VERSION) {
+    throw new UnsupportedSaveVersionError(incomingVersion);
+  }
   const unsafeBattle = incoming.battle?.status === "running" || incoming.battle?.status === "defeat";
   const checkpoint = unsafeBattle && incoming.waveCheckpoint && typeof incoming.waveCheckpoint === "object" ? incoming.waveCheckpoint : undefined;
   const saved: Partial<GameState> = checkpoint ? {
@@ -180,41 +202,57 @@ export function migrateState(raw: unknown): GameState {
   } : { ...incoming, battle: undefined, waveCheckpoint: undefined };
   const resolveId = (id: unknown) => typeof id === "string" ? legacyCharacterIds[id] ?? id : "";
   const isKnownId = (id: string) => characters.some((unit) => unit.id === id);
+  const fallback = makeInitialState(() => 0);
+  const number = (value: unknown, fallbackValue: number) => typeof value === "number" && Number.isFinite(value) ? value : fallbackValue;
+  const progress = normalizeProgress(number(saved.level, fallback.level), number(saved.xp, fallback.xp));
   const shop = (Array.isArray(saved.shop) ? saved.shop : []).slice(0, 5).map((candidate) => {
     const id = resolveId(candidate); return isKnownId(id) ? id : null;
   });
   while (shop.length < 5) shop.push(initialShop[shop.length] ?? null);
   const rawPieces = (Array.isArray(saved.pieces) ? saved.pieces : []).slice(0, BENCH_SLOTS.length + DEPLOY_SLOTS.length + 1).flatMap((piece, index) => {
     if (!piece || typeof piece !== "object") return [];
-    const candidate = piece as Piece;
+    const candidate = piece as Partial<Piece>;
     const characterId = resolveId(candidate.characterId);
-    if (!isKnownId(characterId) || ![...BENCH_SLOTS, ...DEPLOY_SLOTS, THRONE_SLOT].includes(candidate.slotId)) return [];
+    if (!isKnownId(characterId) || !isSlotId(candidate.slotId)) return [];
     const star: Piece["star"] = candidate.star === 2 || candidate.star === 3 ? candidate.star : 1;
     const id = typeof candidate.id === "string" && candidate.id.trim() ? candidate.id : `migrated-piece-${index + 1}`;
-    const throneReturnSlot = candidate.slotId === THRONE_SLOT && isDeploySlot(candidate.throneReturnSlot ?? "bench-1") ? candidate.throneReturnSlot : undefined;
-    return [{ ...candidate, id, characterId, star, ...(throneReturnSlot ? { throneReturnSlot } : {}) }];
+    const throneReturnSlot = candidate.slotId === THRONE_SLOT && isDeploySlot(candidate.throneReturnSlot) ? candidate.throneReturnSlot : undefined;
+    // Rebuild from the V6 stable field allowlist. Never spread imported
+    // runtime combat fields such as hp, energy, shields or effect markers.
+    return [{ id, characterId, star, slotId: candidate.slotId, ...(throneReturnSlot ? { throneReturnSlot } : {}) }];
   });
-  // Map V0.1 moved highlands and added new positions. Move old pieces onto a
-  // compatible free deployment tile, otherwise preserve them on the bench.
-  const occupied = new Set<string>();
+  // Map V0.1 moved highlands and added new positions. Preserve legal stable
+  // positions, otherwise use a unique compatible slot without exceeding the
+  // current population cap. Corrupt surplus entries are discarded rather
+  // than retaining duplicate slot references.
+  const occupied = new Set<SlotId>();
   const usedIds = new Set<string>();
-  let pieces = rawPieces.map((rawPiece) => {
+  let fieldedCount = 0;
+  let pieces = rawPieces.flatMap((rawPiece) => {
     const baseId = rawPiece.id;
     let id = baseId; let suffix = 2;
     while (usedIds.has(id)) { id = `${baseId}-${suffix}`; suffix += 1; }
     usedIds.add(id);
     const piece = { ...rawPiece, id };
     const terrain = characters.find((unit) => unit.id === piece.characterId)?.terrain;
-    if (!isDeploySlot(piece.slotId) && !occupied.has(piece.slotId)) { occupied.add(piece.slotId); return piece; }
-    const deployIsCompatible = isDeploySlot(piece.slotId) && terrain && slotTerrain[piece.slotId] === terrain && !occupied.has(piece.slotId);
-    if (deployIsCompatible) { occupied.add(piece.slotId); return piece; }
-    if (isDeploySlot(piece.slotId) && terrain) {
-      const replacement = DEPLOY_SLOTS.find((slot) => slotTerrain[slot] === terrain && !occupied.has(slot));
-      if (replacement) { occupied.add(replacement); return { ...piece, slotId: replacement }; }
+    const requestedIsBench = BENCH_SLOTS.some((slot) => slot === piece.slotId);
+    const canKeepRequested = !occupied.has(piece.slotId) && (
+      requestedIsBench
+      || (isDeploySlot(piece.slotId) && fieldedCount < maxDeployForLevel(progress.level) && terrain !== undefined && slotTerrain[piece.slotId] === terrain)
+      || (isThroneSlot(piece.slotId) && fieldedCount < maxDeployForLevel(progress.level))
+    );
+    let slotId: SlotId | undefined = canKeepRequested ? piece.slotId : undefined;
+    if (!slotId) {
+      const bench = BENCH_SLOTS.find((slot) => !occupied.has(slot));
+      const deploy = fieldedCount < maxDeployForLevel(progress.level) && terrain
+        ? DEPLOY_SLOTS.find((slot) => slotTerrain[slot] === terrain && !occupied.has(slot))
+        : undefined;
+      slotId = isFieldedSlot(piece.slotId) ? deploy ?? bench : bench ?? deploy;
     }
-    const bench = BENCH_SLOTS.find((slot) => !occupied.has(slot));
-    if (bench) { occupied.add(bench); return { ...piece, slotId: bench }; }
-    return piece;
+    if (!slotId) return [];
+    occupied.add(slotId);
+    if (isFieldedSlot(slotId)) fieldedCount += 1;
+    return [{ ...piece, slotId }];
   });
   if (!hasPhilosopherKingUnlock(pieces)) {
     const king = pieces.find((piece) => isThroneSlot(piece.slotId));
@@ -226,11 +264,9 @@ export function migrateState(raw: unknown): GameState {
       const compatible = DEPLOY_SLOTS.find((slot) => !occupiedSlots.has(slot) && slotTerrain[slot] === terrain);
       const safeSlot = bench ?? original ?? compatible;
       if (safeSlot) pieces = pieces.map((piece) => piece.id === king.id ? { ...piece, slotId: safeSlot, throneReturnSlot: undefined } : piece);
+      else pieces = pieces.filter((piece) => piece.id !== king.id);
     }
   }
-  const fallback = makeInitialState();
-  const number = (value: unknown, fallbackValue: number) => typeof value === "number" && Number.isFinite(value) ? value : fallbackValue;
-  const progress = normalizeProgress(number(saved.level, fallback.level), number(saved.xp, fallback.xp));
   return {
     saveVersion: SAVE_VERSION, gold: capGold(number(saved.gold, fallback.gold)), level: progress.level,
     xp: progress.xp, wave: Math.max(1, number(saved.wave, fallback.wave)),

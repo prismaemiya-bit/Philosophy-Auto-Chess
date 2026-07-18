@@ -1,6 +1,6 @@
 {
   "name": "philosophy-auto-chess",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "engines": {
     "node": ">=22.13.0"
@@ -13,6 +13,7 @@
     "test": "npm run typecheck && npm run lint && npm run build && node --import tsx --test tests/game-engine.test.ts tests/rendered-html.test.mjs",
     "test:browser": "node tests/browser-interactions.mjs",
     "test:release": "node tests/release-smoke.mjs",
+    "package:release": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/package-demo.ps1",
     "balance:sim": "node --import tsx scripts/balance-sim.ts",
     "export:map-art": "node --import tsx scripts/export-map-art-package.ts",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",

@@ -24,5 +24,5 @@ if "%IDEA_GARRISON_FOREGROUND%"=="1" (
   "%NODE%" "%~dp0portable-server.mjs"
   exit /b %errorlevel%
 )
-start "Philosophy Auto Chess v0.1 Demo" /min "%NODE%" "%~dp0portable-server.mjs" --open
+start "Philosophy Auto Chess v0.1.1" /min "%NODE%" "%~dp0portable-server.mjs" --open
 exit /b 0

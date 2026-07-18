@@ -27,6 +27,8 @@ export function UnitCombatStatus({ piece, target }: { piece?: Piece; target?: En
 
 export function WaveToast({ summary }: { summary: BattleSummary }) {
   const [expanded, setExpanded] = useState(true);
-  useEffect(() => { const timer = window.setTimeout(() => setExpanded(false), 1000); return () => window.clearTimeout(timer); }, []);
-  return <div className={`wave-toast ${expanded ? "expanded" : "collapsed"}`}><b>{summary.success ? "波次肃清" : "防线失守"}</b><span>{summary.success ? `+${summary.totalGold} 金币` : `核心损伤 ${summary.coreDamage}`}</span></div>;
+  useEffect(() => { const timer = window.setTimeout(() => setExpanded(false), 1450); return () => window.clearTimeout(timer); }, []);
+  const potentialIncome = summary.killGold + summary.baseIncome + summary.interest + summary.perfectBonus;
+  const overflow = Math.max(0, potentialIncome - summary.totalGold);
+  return <div className={`wave-toast ${expanded ? "expanded" : "collapsed"}`} role="status" aria-live="polite"><i aria-hidden="true">◇</i><b>{summary.success ? `第 ${summary.wave} 波肃清` : "防线失守"}</b>{summary.success ? <><span>实际入账 +{summary.totalGold} 金币</span><small>基础 +{summary.baseIncome} · 利息 +{summary.interest}{summary.perfectBonus ? ` · 完美 +${summary.perfectBonus}` : ""}{summary.killGold ? ` · 击杀 +${summary.killGold}` : ""}{overflow ? ` · 30 上限溢出 ${overflow}` : ""}</small></> : <span>核心损伤 {summary.coreDamage}</span>}</div>;
 }

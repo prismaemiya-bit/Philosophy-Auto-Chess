@@ -10,7 +10,7 @@ export function BattleInspector({ piece, enemy }: { piece?: Piece; enemy?: Enemy
     return <aside className={`battle-inspector unit accent-${asset?.accent}`}>
       <div className="inspector-title"><span>{asset?.glyph ?? unit.portrait}</span><div><small>已选部署单位</small><strong>{unit.name}　{piece.star}★</strong></div></div>
       <div className="inspector-tags">{characterTraits[unit.id]?.map((trait) => <b key={trait}>{trait}</b>)}<b>{unit.terrain === "ground" ? "地面" : "高台"}</b></div>
-      <div className="inspector-stats"><span>费用 <b>{unit.cost}</b></span><span>射程 <b>{unit.combat.range}</b></span><span>阻挡 <b>{unit.block + (piece.blockBonus ?? 0)}</b></span><span>生命 <b>{Math.ceil(piece.hp ?? unit.stats.resolve)}/{piece.maxHp ?? unit.stats.resolve}</b></span></div>
+      <div className="inspector-stats"><span>防御 <b>{unit.stats.guard}</b></span><span>射程 <b>{unit.combat.range}</b></span><span>阻挡 <b>{unit.block + (piece.blockBonus ?? 0)}</b></span><span>生命 <b>{Math.ceil(piece.hp ?? unit.stats.resolve)}/{piece.maxHp ?? unit.stats.resolve}</b></span></div>
       <p><b>{unit.skill.name}</b>：{skillDetails[unit.id] ?? unit.skill.summary}</p><em>圆形虚线为攻击范围；地面单位可阻挡，高台单位阻挡为 0。</em>
     </aside>;
   }

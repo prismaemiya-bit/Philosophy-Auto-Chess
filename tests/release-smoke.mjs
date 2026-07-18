@@ -5,7 +5,10 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "..");
-const releaseZip = path.join(root, "release", "philosophy-auto-chess-v0.1-demo-windows-portable.zip");
+const releaseInfo = JSON.parse(await readFile(path.join(root, "release-info.json"), "utf8"));
+const releaseZip = process.env.IDEA_GARRISON_RELEASE_ZIP
+  ? path.resolve(process.env.IDEA_GARRISON_RELEASE_ZIP)
+  : path.join(root, "release", `${releaseInfo.artifactBase}-windows-portable.zip`);
 const chromePath = process.env.CHROME_PATH ?? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const port = Number(process.env.IDEA_GARRISON_RELEASE_PORT ?? 42108);
 const remotePort = port + 1000;
@@ -58,7 +61,9 @@ async function main() {
 
   let server = startPackagedServer(packageRoot); let chrome; let cdp;
   try {
-    await waitFor(async () => (await fetch(`http://127.0.0.1:${port}/__idea_garrison_health`)).ok, "packaged production server");
+    const health = await waitFor(async () => { const response = await fetch(`http://127.0.0.1:${port}/__idea_garrison_health`); return response.ok ? response.json() : false; }, "packaged production server");
+    assert.equal(health.version, releaseInfo.versionId);
+    assert.equal(health.developer, releaseInfo.developer);
     chrome = spawn(chromePath, ["--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check", `--remote-debugging-port=${remotePort}`, `--user-data-dir=${userData}`, "--window-size=1920,1080", "about:blank"], { stdio: "ignore" });
     const target = await waitFor(async () => { const response = await fetch(`http://127.0.0.1:${remotePort}/json/list`); return (await response.json()).find((item) => item.type === "page" && item.webSocketDebuggerUrl); }, "fresh Chrome profile");
     cdp = await connectCdp(target.webSocketDebuggerUrl); await cdp.call("Page.enable"); await cdp.call("Runtime.enable");
@@ -104,7 +109,7 @@ async function main() {
     await waitFor(() => evaluateRestarted("Boolean(document.querySelector('.game-shell'))"), "continued saved game after full restart");
     const afterRestart = JSON.parse(await evaluateRestarted("localStorage.getItem('idea-garrison-v01-save-v6')"));
     assert.equal(afterRestart.saveVersion, 6); assert.deepEqual(afterRestart.pieces, beforeRestart.pieces); assert.equal(afterRestart.wave, beforeRestart.wave);
-    console.log("Demo release smoke passed: clean unzip, relative Unicode path, production gates, purchase, deploy, wave, close, restart and V6 continuation.");
+    console.log(`Demo release smoke passed (${releaseInfo.displayVersion}, ${releaseInfo.developer}): clean unzip, relative Unicode path, production gates, purchase, deploy, wave, close, restart and V6 continuation.`);
   } catch (error) {
     console.error(server.getLog().slice(-4000)); throw error;
   } finally {
