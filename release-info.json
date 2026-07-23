@@ -1,0 +1,11 @@
+{
+  "productName": "往哲荣耀",
+  "englishName": "Philosophy Auto Chess",
+  "version": "0.2.0",
+  "versionId": "v0.2",
+  "displayVersion": "v0.2",
+  "developer": "折射棱镜开发",
+  "launcherName": "启动往哲荣耀.cmd",
+  "releaseNotes": "RELEASE_NOTES_v0.2.md",
+  "artifactBase": "philosophy-auto-chess-v0.2"
+}

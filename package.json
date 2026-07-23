@@ -1,6 +1,6 @@
 {
   "name": "philosophy-auto-chess",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "engines": {
     "node": ">=22.13.0"
@@ -10,10 +10,15 @@
     "build": "set WRANGLER_LOG_PATH=.wrangler/wrangler.log&& vinext build",
     "start": "set WRANGLER_LOG_PATH=.wrangler/wrangler.log&& vinext start",
     "typecheck": "tsc --noEmit",
-    "test": "npm run typecheck && npm run lint && npm run build && node --import tsx --test tests/game-engine.test.ts tests/rendered-html.test.mjs",
+    "typecheck:tools": "tsc --noEmit -p tsconfig.tools.json",
+    "test": "npm run typecheck && npm run typecheck:tools && npm run lint && npm run build && node --import tsx --test tests/game-engine.test.ts tests/rendered-html.test.mjs",
     "test:browser": "node tests/browser-interactions.mjs",
     "test:release": "node tests/release-smoke.mjs",
+    "package:release": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/package-demo.ps1",
+    "generate:audio": "node scripts/generate-audio-assets.mjs",
     "balance:sim": "node --import tsx scripts/balance-sim.ts",
+    "economy:sim": "node --import tsx scripts/economy-sim.ts",
+    "history:sim": "node --import tsx scripts/historical-event-sim.ts",
     "export:map-art": "node --import tsx scripts/export-map-art-package.ts",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"

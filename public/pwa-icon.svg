@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="往哲荣耀">
+  <defs>
+    <radialGradient id="bg" cx="38%" cy="28%" r="78%">
+      <stop offset="0" stop-color="#173b40"/>
+      <stop offset=".58" stop-color="#091b20"/>
+      <stop offset="1" stop-color="#050b0e"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#f2d98c"/>
+      <stop offset="1" stop-color="#a97631"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="104" fill="url(#bg)"/>
+  <path d="M68 168h122l66 88M68 256h122l66 0M68 344h122l66-88" fill="none" stroke="#65b9b6" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" opacity=".78"/>
+  <circle cx="68" cy="168" r="16" fill="#071014" stroke="#78cbc5" stroke-width="9"/>
+  <circle cx="68" cy="256" r="16" fill="#071014" stroke="#78cbc5" stroke-width="9"/>
+  <circle cx="68" cy="344" r="16" fill="#071014" stroke="#78cbc5" stroke-width="9"/>
+  <path d="M256 92 420 256 256 420 92 256Z" fill="#071216" stroke="url(#gold)" stroke-width="20"/>
+  <path d="M256 153 359 256 256 359 153 256Z" fill="#102a2e" stroke="#e7c875" stroke-width="10"/>
+  <circle cx="256" cy="256" r="38" fill="#d5b45e"/>
+  <circle cx="256" cy="256" r="19" fill="#071014"/>
+</svg>

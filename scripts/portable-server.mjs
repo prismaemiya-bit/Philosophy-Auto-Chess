@@ -7,6 +7,7 @@ import { spawn } from "node:child_process";
 const packageRoot = dirname(fileURLToPath(import.meta.url));
 const clientRoot = join(packageRoot, "dist", "client");
 const workerPath = join(packageRoot, "dist", "server", "index.js");
+const releaseInfo = JSON.parse(await readFile(join(packageRoot, "release-info.json"), "utf8"));
 const host = "127.0.0.1";
 const port = Number(process.env.IDEA_GARRISON_PORT ?? 32108);
 const mimeTypes = new Map([
@@ -40,7 +41,7 @@ const server = createServer(async (incoming, outgoing) => {
   try {
     if (incoming.url === "/__idea_garrison_health") {
       outgoing.writeHead(200, { "content-type": "application/json; charset=utf-8" });
-      outgoing.end(JSON.stringify({ app: "philosophy-auto-chess", version: "v0.1-demo" }));
+      outgoing.end(JSON.stringify({ app: "philosophy-auto-chess", version: releaseInfo.versionId, developer: releaseInfo.developer }));
       return;
     }
     const chunks = [];
@@ -73,7 +74,7 @@ server.on("error", (error) => {
 
 server.listen(port, host, () => {
   const url = `http://${host}:${port}/`;
-  console.log(`往哲荣耀 v0.1 Demo 已启动：${url}`);
+  console.log(`${releaseInfo.productName} ${releaseInfo.displayVersion} · ${releaseInfo.developer} 已启动：${url}`);
   if (process.argv.includes("--open")) {
     const child = spawn(process.env.ComSpec ?? "cmd.exe", ["/d", "/c", "start", "", url], { detached: true, stdio: "ignore", windowsHide: true });
     child.unref();

@@ -19,7 +19,7 @@ coverage/
 
 # Local runtime, packages, logs and generated work
 .runtime/
-release/
+/release/
 artifacts/
 outputs/
 work/

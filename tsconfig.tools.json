@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": false,
+    "allowImportingTsExtensions": true,
+    "plugins": []
+  },
+  "include": [
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "scripts/**/*.ts"
+  ]
+}
