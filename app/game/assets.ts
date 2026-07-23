@@ -1,33 +1,48 @@
 /** Presentation-only asset registry. Replace values here when final art arrives. */
 import type { EnemyKind } from "./battle";
 
-export type AssetRef = { glyph: string; portrait?: string; accent: string; label: string; armor?: number; speed?: string; trait?: string };
+export type AssetRef = { glyph: string; portrait?: string; portraitShape?: "pentagon"; accent: string; label: string; armor?: number; speed?: string; trait?: string };
 
 export const characterAssets: Record<string, AssetRef> = {
-  socrates: { glyph: "◎", accent: "gold", label: "控场" }, plato: { glyph: "◇", accent: "gold", label: "支援" },
-  aristotle: { glyph: "⌁", accent: "cyan", label: "狙击" }, epicurus: { glyph: "✚", accent: "green", label: "治疗" },
-  fichte: { glyph: "▣", accent: "blue", label: "重装" }, husserl: { glyph: "◉", accent: "green", label: "治疗" },
-  schelling: { glyph: "✦", accent: "violet", label: "爆破" }, heidegger: { glyph: "⬡", accent: "blue", label: "重装" },
-  kant: { glyph: "△", accent: "cyan", label: "控场" }, hegel: { glyph: "◈", accent: "violet", label: "爆破" },
-  descartes: { glyph: "✧", accent: "cyan", label: "控场" }, rousseau: { glyph: "❖", accent: "green", label: "治疗" },
-  sartre: { glyph: "◇", accent: "orange", label: "战士" }, foucault: { glyph: "⌘", accent: "violet", label: "爆破" },
-  locke: { glyph: "▱", accent: "green", label: "支援" }, hume: { glyph: "⌁", accent: "cyan", label: "狙击" },
-  hobbes: { glyph: "⬟", accent: "blue", label: "重装" }, russell: { glyph: "⊞", accent: "violet", label: "爆破" },
-  althusser: { glyph: "◫", accent: "violet", label: "辅助" },
-  bacon: { glyph: "⌁", accent: "cyan", label: "射手" }, bentham: { glyph: "⊕", accent: "green", label: "辅助" },
-  deleuze: { glyph: "✣", accent: "violet", label: "群攻" }, derrida: { glyph: "⌘", accent: "violet", label: "控制" },
-  lacan: { glyph: "◌", accent: "orange", label: "控制" }, wittgenstein: { glyph: "∴", accent: "cyan", label: "控制" },
+  socrates: { glyph: "◎", portrait: "/assets/characters/socrates.webp", portraitShape: "pentagon", accent: "gold", label: "控场" },
+  plato: { glyph: "◇", portrait: "/assets/characters/plato.webp", portraitShape: "pentagon", accent: "gold", label: "支援" },
+  aristotle: { glyph: "⌁", portrait: "/assets/characters/aristotle.webp", portraitShape: "pentagon", accent: "cyan", label: "狙击" },
+  epicurus: { glyph: "✚", portrait: "/assets/characters/epicurus.webp", portraitShape: "pentagon", accent: "green", label: "治疗" },
+  fichte: { glyph: "▣", portrait: "/assets/characters/fichte.webp", portraitShape: "pentagon", accent: "blue", label: "重装" }, husserl: { glyph: "◉", portrait: "/assets/characters/husserl.webp", portraitShape: "pentagon", accent: "green", label: "治疗" },
+  schelling: { glyph: "✦", portrait: "/assets/characters/schelling.webp", portraitShape: "pentagon", accent: "violet", label: "爆破" }, heidegger: { glyph: "⬡", portrait: "/assets/characters/heidegger.webp", portraitShape: "pentagon", accent: "blue", label: "重装" },
+  kant: { glyph: "△", portrait: "/assets/characters/kant.webp", portraitShape: "pentagon", accent: "cyan", label: "控场" }, hegel: { glyph: "◈", portrait: "/assets/characters/hegel.webp", portraitShape: "pentagon", accent: "violet", label: "爆破" },
+  descartes: { glyph: "✧", portrait: "/assets/characters/descartes.webp", portraitShape: "pentagon", accent: "cyan", label: "控场" }, rousseau: { glyph: "❖", portrait: "/assets/characters/rousseau.webp", portraitShape: "pentagon", accent: "green", label: "治疗" },
+  sartre: { glyph: "◇", portrait: "/assets/characters/sartre.webp", portraitShape: "pentagon", accent: "orange", label: "战士" }, foucault: { glyph: "⌘", portrait: "/assets/characters/foucault.webp", portraitShape: "pentagon", accent: "violet", label: "爆破" },
+  locke: { glyph: "▱", portrait: "/assets/characters/locke.webp", portraitShape: "pentagon", accent: "green", label: "支援" }, hume: { glyph: "⌁", portrait: "/assets/characters/hume.webp", portraitShape: "pentagon", accent: "cyan", label: "狙击" },
+  hobbes: { glyph: "⬟", portrait: "/assets/characters/hobbes.webp", portraitShape: "pentagon", accent: "blue", label: "重装" }, russell: { glyph: "⊞", portrait: "/assets/characters/russell.webp", portraitShape: "pentagon", accent: "violet", label: "爆破" },
+  althusser: { glyph: "◫", portrait: "/assets/characters/althusser.webp", portraitShape: "pentagon", accent: "violet", label: "辅助" },
+  bacon: { glyph: "⌁", portrait: "/assets/characters/bacon.webp", portraitShape: "pentagon", accent: "cyan", label: "射手" }, bentham: { glyph: "⊕", portrait: "/assets/characters/bentham.webp", portraitShape: "pentagon", accent: "green", label: "辅助" },
+  deleuze: { glyph: "✣", portrait: "/assets/characters/deleuze.webp", portraitShape: "pentagon", accent: "violet", label: "群攻" }, derrida: { glyph: "⌘", portrait: "/assets/characters/derrida.webp", portraitShape: "pentagon", accent: "violet", label: "控制" },
+  lacan: { glyph: "◌", portrait: "/assets/characters/lacan.webp", portraitShape: "pentagon", accent: "orange", label: "控制" }, wittgenstein: { glyph: "∴", portrait: "/assets/characters/wittgenstein.webp", portraitShape: "pentagon", accent: "cyan", label: "控制" },
 };
 
+export const factionAssets = {
+  greece: { glyph: "Ω", accent: "gold", label: "古希腊·理念学园" },
+  germany: { glyph: "◇", accent: "blue", label: "德国·体系" },
+  france: { glyph: "✦", accent: "red", label: "法国·革命" },
+  britain: { glyph: "⌁", accent: "cyan", label: "英国·实验" },
+} as const satisfies Record<string, AssetRef>;
+
+export const bossAssetIds = ["cave-boss", "skeptic-boss", "dialectic-boss", "boss", "leviathan-boss"] as const;
+
 export const enemyAssets: Record<EnemyKind, AssetRef> = {
-  swift: { glyph: "›", accent: "red", label: "快速", armor: 0, speed: "很快", trait: "高速穿行" },
-  ordinary: { glyph: "●", accent: "teal", label: "普通", armor: 0, speed: "正常", trait: "无特殊能力" },
-  caster: { glyph: "◉", accent: "violet", label: "施法", armor: 4, speed: "较慢", trait: "施法攻击" },
-  swarm: { glyph: "••", accent: "red", label: "群体", armor: 0, speed: "较快", trait: "成群推进" },
-  armored: { glyph: "▣", accent: "gold", label: "重甲", armor: 20, speed: "很慢", trait: "高护甲" },
-  elite: { glyph: "✦", accent: "orange", label: "精英", armor: 12, speed: "中等", trait: "精英压迫" },
+  "war-machine": { glyph: "⚙", accent: "orange", label: "攻城重装", armor: 18, speed: "缓慢", trait: "移动减伤；持续受阻会召唤常识卫士" },
+  swift: { glyph: "⚡", accent: "red", label: "快速近战", armor: 0, speed: "很快", trait: "高速穿行" },
+  ordinary: { glyph: "⚔", accent: "teal", label: "基础近战", armor: 0, speed: "正常", trait: "阻挡权重 1" },
+  caster: { glyph: "🏹", accent: "violet", label: "远程", armor: 4, speed: "较慢", trait: "推进中射击高台" },
+  swarm: { glyph: "⋯", accent: "red", label: "集群近战", armor: 0, speed: "较快", trait: "成群消耗阻挡" },
+  armored: { glyph: "🛡", accent: "gold", label: "重装近战", armor: 20, speed: "很慢", trait: "阻挡权重 2" },
+  elite: { glyph: "⌖", accent: "orange", label: "精英远程", armor: 12, speed: "中等", trait: "远程压制；阻挡权重 2" },
   "cave-boss": { glyph: "◉", accent: "violet", label: "洞穴之影", armor: 12, speed: "中等", trait: "50% 生命触发转身之痛" },
+  "skeptic-boss": { glyph: "?", accent: "cyan", label: "怀疑深渊", armor: 18, speed: "较慢", trait: "55% 生命获得 24% 最大生命护盾" },
+  "dialectic-boss": { glyph: "⇄", accent: "red", label: "矛盾机枢", armor: 14, speed: "中等", trait: "65% 加速；30% 恢复生命并获得护盾" },
   boss: { glyph: "☉", accent: "orange", label: "绝对精神", armor: 30, speed: "缓慢", trait: "75% / 45% / 20% 生命触发固定精神阶段" },
+  "leviathan-boss": { glyph: "♜", accent: "gold", label: "契约利维坦", armor: 34, speed: "很慢", trait: "70% / 35% 生命召集契约卫队" },
 };
 
 export const mapAssets = {

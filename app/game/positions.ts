@@ -89,7 +89,8 @@ export const deploymentSlots = [
   { id: "deploy-20", terrain: "highland", point: { x: 89, y: 69 }, zone: "core observatory" },
 ] as const satisfies readonly DeploymentSlotDefinition[];
 
-export const DEPLOYMENT_SLOT_IDS = deploymentSlots.map((slot) => slot.id);
+export type DeploymentSlotId = (typeof deploymentSlots)[number]["id"];
+export const DEPLOYMENT_SLOT_IDS: readonly DeploymentSlotId[] = deploymentSlots.map((slot) => slot.id);
 export const deploymentById: Record<string, DeploymentSlotDefinition> = Object.fromEntries(deploymentSlots.map((slot) => [slot.id, slot]));
 export const slotTerrain: Record<string, SlotTerrain> = Object.fromEntries(deploymentSlots.map((slot) => [slot.id, slot.terrain]));
 /** Special preparation slot. It is not part of the frozen 20 normal slots. */
@@ -118,9 +119,17 @@ function routeLengths(route: readonly RouteWaypoint[]) {
   return { segments, total: segments.reduce((sum, value) => sum + value, 0) };
 }
 
+// Routes are authored constants. Cache their metrics once instead of allocating
+// a new segments array for every target/range query during a combat tick.
+const routeMetrics: Record<LaneId, ReturnType<typeof routeLengths>> = {
+  upper: routeLengths(routeDefinitions.upper),
+  lower: routeLengths(routeDefinitions.lower),
+  side: routeLengths(routeDefinitions.side),
+};
+
 /** Progress follows travelled distance, so enemies do not accelerate on long segments. */
 export function routePoint(progress: number, lane: LaneId = "upper"): Point {
-  const route = routeDefinitions[lane]; const { segments, total } = routeLengths(route);
+  const route = routeDefinitions[lane]; const { segments, total } = routeMetrics[lane];
   let remaining = Math.max(0, Math.min(1, progress)) * total;
   for (let index = 0; index < segments.length; index += 1) {
     const length = segments[index];

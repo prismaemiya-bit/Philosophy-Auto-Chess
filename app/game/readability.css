@@ -1,0 +1,51 @@
+/* Final accessibility layer. It intentionally comes last: map coordinates stay
+   percentage-based and 16:9 while the document, not the combat surface, scrolls. */
+html,body{min-width:0;min-height:100%;overflow-x:clip;overflow-y:auto}
+.game-shell--showcase .map-field{--map-unit-w:max(5.1cqw,52px);--map-unit-h:max(6.4cqw,66px)}
+@media(min-width:1000px){
+  .game-shell--showcase{height:auto!important;min-height:100dvh!important;max-height:none!important;overflow-x:clip!important;overflow-y:visible!important;grid-template-rows:auto auto auto auto!important;padding:8px 16px 18px!important;gap:8px!important}
+  .game-shell--showcase>.board-grid{height:auto!important;min-height:0;align-items:stretch}
+  .game-shell--showcase>.board-grid>.map-panel{height:auto!important;grid-template-columns:clamp(116px,8vw,150px) minmax(0,1fr) clamp(132px,9vw,168px)!important;min-height:0}
+  .game-shell--showcase>.board-grid>.map-panel>.map-field{width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;aspect-ratio:16/9!important}
+  .game-shell--showcase>.board-grid>.economy{height:auto!important;min-height:0;overflow:visible!important}
+  .game-shell--showcase .shop-card{min-height:108px!important;padding:8px!important}
+  .game-shell--showcase .shop-card .portrait{width:38px!important;height:38px!important}
+  .game-shell--showcase .shop-text h3{font-size:13px!important}
+  .game-shell--showcase .shop-text p{font-size:10px!important;line-height:1.35;margin:4px 0!important}
+  .game-shell--showcase .shop-text small,.game-shell--showcase .shop-skill-summary{font-size:10px!important;line-height:1.4!important}
+  .game-shell--showcase .shop-stats{font-size:9px!important}
+  .game-shell--showcase .bench .slot{min-height:76px!important}
+  .game-shell--showcase .map-field>.deploy-grid .unit-top b{font-size:max(.62cqw,7px)!important}
+  .game-shell--showcase .map-field>.deploy-grid .unit-top span{font-size:max(.54cqw,6px)!important}
+  .game-shell--showcase .map-field>.deploy-grid .unit-name strong{font-size:max(.76cqw,8px)!important}
+  .arena-side-rail>header small,.command-resources>header small,.command-wave-panel .wave-forecast>header small{font-size:9px!important}
+  .arena-side-rail>header b,.command-resources>header b,.command-wave-panel .wave-forecast>header b{font-size:13px!important}
+  .resonance-rail button b,.telemetry-rail b,.damage-rank b{font-size:10px!important}
+  .resonance-rail button small,.telemetry-rail small,.telemetry-rail p,.damage-rank small{font-size:9px!important;line-height:1.4}
+  .command-resources small{font-size:9px!important}.command-resources span b{font-size:13px!important}
+  .command-resources>div>.primary-resource b{font-size:16px!important}
+  .shop-actions{min-width:112px}.shop-actions button{font-size:11px!important}.shop-actions b{font-size:10px!important;line-height:1.3;text-align:center}
+}
+@media(min-width:1000px) and (max-width:1400px){
+  .game-shell--showcase>.board-grid{grid-template-columns:1fr!important}
+  .game-shell--showcase>.board-grid>.economy{display:grid!important;grid-template-columns:1fr 1fr;grid-template-rows:auto!important;gap:8px}
+  .game-shell--showcase>.board-grid>.map-panel{grid-template-columns:120px minmax(0,1fr) 140px!important}
+}
+@media(max-width:999px){
+  .game-shell--showcase{height:auto!important;min-height:100dvh;overflow:visible!important}
+  .game-shell--showcase>.board-grid{grid-template-columns:1fr!important}
+  .game-shell--showcase>.board-grid>.map-panel{display:grid!important;grid-template-columns:1fr!important;gap:8px;padding:8px!important;overflow:visible!important}
+  .game-shell--showcase>.board-grid>.map-panel>.map-field{grid-column:1;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;aspect-ratio:16/9!important;margin:0!important}
+  .game-shell--showcase>.board-grid>.economy{width:100%;max-height:none!important;overflow:visible!important}
+  .arena-side-rail{min-width:0;padding:8px;border:1px solid rgba(112,156,163,.3);background:linear-gradient(180deg,rgba(6,17,24,.94),rgba(4,10,16,.97));color:#b9cbc6}
+  .arena-side-rail>header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}.arena-side-rail>header small{font-size:9px;color:#62b7bd}.arena-side-rail>header b{font-size:13px;color:#ead28c}
+  .resonance-rail>div{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}.resonance-rail button{flex:0 0 118px;min-height:44px;display:grid;grid-template-columns:25px 1fr;align-items:center;gap:5px;padding:5px;border:1px solid rgba(113,156,160,.3);background:rgba(9,24,30,.9);color:#b9cbc6}.resonance-rail button>span{display:grid}.resonance-rail button b{font-size:10px}.resonance-rail button small{font-size:9px}
+  .telemetry-rail{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;align-items:start}.telemetry-rail>header{display:grid}.telemetry-rail>section{margin:0;padding:0;border:0}.telemetry-rail p,.damage-rank small{font-size:9px}
+  .game-shell--showcase .shop-text h3{font-size:13px}.game-shell--showcase .shop-text p,.game-shell--showcase .shop-skill-summary{font-size:10px;line-height:1.4}
+}
+.population-resource b{letter-spacing:0!important}
+.tutorial-coach{position:fixed;z-index:120;right:18px;bottom:18px;width:min(390px,calc(100vw - 36px));padding:15px 17px;border:1px solid rgba(231,199,112,.78);background:linear-gradient(145deg,rgba(18,38,43,.98),rgba(5,14,20,.99));box-shadow:0 18px 52px rgba(0,0,0,.68);color:#dbe5dc;font-family:Arial,"Microsoft Yahei",sans-serif}
+.tutorial-coach header,.tutorial-coach footer{display:flex;align-items:center;justify-content:space-between;gap:8px}.tutorial-coach header small{color:#75c3c0;font-size:10px;letter-spacing:1px}.tutorial-coach header button{border:0;background:transparent;color:#9bb0a9;padding:4px 0}.tutorial-coach>strong{display:block;margin-top:10px;color:#f0d486;font:600 18px/1.25 Georgia,"Songti SC",serif}.tutorial-coach p{margin:8px 0 14px;color:#c8d3cd;font-size:13px;line-height:1.65}.tutorial-coach footer{justify-content:flex-end}.tutorial-coach footer button{min-width:76px;padding:8px 12px;border:1px solid rgba(125,169,155,.42);background:#122428;color:#cadbd4}.tutorial-coach footer button.primary{border-color:#d8b760;background:#5d4b25;color:#fff0bd}.tutorial-coach footer button:disabled{opacity:.35}
+.game-shell--showcase:has(.tutorial-target-shop) [data-tutorial="shop"],.game-shell--showcase:has(.tutorial-target-bench) [data-tutorial="bench"],.game-shell--showcase:has(.tutorial-target-deploy) [data-tutorial="deploy"],.game-shell--showcase:has(.tutorial-target-population) [data-tutorial="population"],.game-shell--showcase:has(.tutorial-target-wave) [data-tutorial="wave"],.game-shell--showcase:has(.tutorial-target-xp) [data-tutorial="xp"]{outline:2px solid #f0ce72;outline-offset:3px;box-shadow:0 0 18px rgba(240,206,114,.42)}
+.game-shell--showcase:has(.tutorial-target-resonance) .resonance-rail{outline:2px solid #f0ce72;outline-offset:3px;box-shadow:0 0 18px rgba(240,206,114,.42)}
+@media(max-width:600px){.tutorial-coach{right:10px;bottom:10px;width:calc(100vw - 20px)}}

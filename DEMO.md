@@ -1,4 +1,4 @@
-# Philosophy Auto Chess — 往哲荣耀 v0.1 Demo
+# Philosophy Auto Chess — 往哲荣耀 v0.2
 
 ## Goal
 
@@ -21,7 +21,11 @@ Build a team of philosophers, defend three fixed routes, and keep the Philosophe
 - Ten waves, including Cave Shadow on W5 and Absolute Spirit on W10
 - Preparation decisions for Greece, France, Britain and Enlightenment
 - Philosopher King and Royal Barrier
-- Automatic V6 local saves and wave retry checkpoints
+- Historical events, ideology choices and deterministic war-machine encounters
+- Automatic V7 local saves, V1–V6 migration and wave retry checkpoints
+- Player-facing save export/import with an automatic pre-import backup
+- Desktop and landscape-phone browser layouts sharing one game core
+- Installable PWA metadata and an online-first update strategy
 
 ## Feedback
 
@@ -35,9 +39,9 @@ Open **Settings → Feedback Tools** to copy or export the balance report. Usefu
 
 ## Current limitations
 
-- The battlefield artwork is temporary.
 - The interface is currently in Simplified Chinese.
-- Equipment, online play and additional factions are outside the v0.1 Demo scope.
+- The current repository does not include final music or recorded sound files; the defensive synthesized fallback can be muted independently.
+- Equipment, online play, cloud saves and additional factions are outside the v0.2 scope.
 - Balance is intended for external playtesting and is not final competitive tuning.
 
 ## Validation baseline

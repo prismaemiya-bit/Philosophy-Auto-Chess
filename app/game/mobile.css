@@ -1,0 +1,2502 @@
+/*
+ * Authoritative phone/tablet layer. Imported last so small screens have one
+ * responsive owner while the accepted desktop layout remains unchanged.
+ */
+.landscape-hint,
+.mobile-more-toggle,
+.mobile-more-menu,
+.mobile-selection-bar,
+.mobile-bench-tab,
+.mobile-shop-toggle {
+  display: none;
+}
+
+.landscape-hint.dismissed {
+  display: none !important;
+}
+
+@media (max-width: 999px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    -webkit-text-size-adjust: 100%;
+    overscroll-behavior-y: contain;
+  }
+
+  button,
+  [role="button"],
+  summary,
+  input {
+    touch-action: manipulation;
+  }
+
+  .game-shell--showcase {
+    box-sizing: border-box !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100dvh !important;
+    padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)) !important;
+    overflow: visible !important;
+  }
+
+  .game-shell--showcase > .topbar {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px;
+    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 8px !important;
+    overflow: visible !important;
+  }
+
+  .game-shell--showcase > .topbar .game-title {
+    margin: 0;
+    font-size: clamp(20px, 5.5vw, 28px);
+  }
+
+  .game-shell--showcase > .topbar .window-switches {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    overflow: visible;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > button,
+  .game-shell--showcase > .topbar .window-switches > .top-info-control,
+  .game-shell--showcase > .topbar .window-switches > .core-health-control {
+    flex: 1 1 132px;
+    min-width: 0;
+  }
+
+  .game-shell--showcase > .topbar .window-switches button {
+    width: 100%;
+    min-width: 0 !important;
+    min-height: 44px;
+  }
+
+  .game-shell--showcase > .topbar .top-core-resource {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .top-info-popover,
+  .core-damage-ledger {
+    position: fixed !important;
+    z-index: 130 !important;
+    inset: auto max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)) !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: min(70dvh, 620px);
+    overflow: auto;
+  }
+
+  .game-shell--showcase > .status-line {
+    box-sizing: border-box;
+    display: flex !important;
+    width: 100%;
+    height: auto !important;
+    min-height: 40px !important;
+    margin: 8px 0 !important;
+    padding: 7px 8px !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+  }
+
+  .status-line .status-notice {
+    min-width: 160px;
+  }
+
+  .game-shell--showcase > .board-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel {
+    box-sizing: border-box;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 8px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior-x: contain;
+    scrollbar-color: rgba(225, 200, 137, .58) rgba(5, 14, 19, .82);
+    scrollbar-width: thin;
+    contain: inline-size;
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel > .map-field {
+    grid-column: 1;
+    width: 100% !important;
+    height: auto !important;
+    min-width: 0;
+    min-height: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    aspect-ratio: 16 / 9 !important;
+  }
+
+  .arena-side-rail {
+    position: sticky;
+    left: 0;
+    width: calc(100vw - 32px) !important;
+    max-width: none !important;
+    min-height: 0 !important;
+  }
+
+  .arena-side-rail > div,
+  .telemetry-rail > section {
+    display: flex !important;
+    gap: 7px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+  }
+
+  .arena-side-rail button,
+  .telemetry-rail .damage-rank,
+  .telemetry-rail > section > p {
+    flex: 0 0 min(180px, 70vw);
+    min-height: 44px;
+    scroll-snap-align: start;
+  }
+
+  .game-shell--showcase > .board-grid > .economy {
+    box-sizing: border-box;
+    width: 100%;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .game-shell--showcase > .economy-deck,
+  .game-shell--showcase > .economy-deck > .bench,
+  .game-shell--showcase > .economy-deck > .shop {
+    box-sizing: border-box;
+    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  .game-shell--showcase > .economy-deck {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+    margin-top: 10px !important;
+    overflow: visible !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench {
+    position: relative !important;
+    display: grid !important;
+    grid-template-rows: auto auto !important;
+    overflow: hidden !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench > .bench-grid {
+    display: grid !important;
+    grid-template-columns: repeat(9, 76px) !important;
+    justify-content: start !important;
+    gap: 8px !important;
+    width: 100%;
+    height: 120px !important;
+    padding: 8px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x proximity;
+    contain: inline-size;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench .slot {
+    width: 76px !important;
+    min-width: 76px !important;
+    height: 104px !important;
+    min-height: 104px !important;
+    scroll-snap-align: start;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench .unit-card {
+    width: 70px !important;
+    min-width: 70px !important;
+    height: 100px !important;
+    min-height: 100px !important;
+    max-width: 70px !important;
+    max-height: 100px !important;
+    grid-template-rows: 11px minmax(0, 1fr) 15px 7px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench .unit-avatar {
+    width: 62px !important;
+    height: 62px !important;
+    min-width: 62px !important;
+    min-height: 62px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .shop .shop-content {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+    width: 100%;
+    height: auto !important;
+    padding: 8px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .shop .shop-grid {
+    display: grid !important;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(210px, 72vw);
+    grid-template-columns: none !important;
+    gap: 9px !important;
+    width: 100%;
+    height: 132px !important;
+    padding: 0 1px 6px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory;
+    contain: inline-size;
+  }
+
+  .game-shell--showcase > .economy-deck > .shop .shop-card-slot {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 124px !important;
+    scroll-snap-align: start;
+  }
+
+  .game-shell--showcase > .economy-deck > .shop .shop-card-slot > .shop-card {
+    grid-template-columns: 68px minmax(0, 1fr) !important;
+    gap: 9px !important;
+    width: 100% !important;
+    height: 124px !important;
+    padding: 9px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .shop .portrait {
+    width: 68px !important;
+    height: 68px !important;
+    min-width: 68px !important;
+    min-height: 68px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .shop .shop-actions {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-rows: 48px !important;
+    gap: 7px !important;
+    width: 100%;
+    height: auto !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .shop .shop-actions button {
+    width: 100%;
+    min-height: 48px !important;
+    height: 48px !important;
+    font-size: 12px !important;
+  }
+
+  .settings-dialog,
+  .mission-drawer {
+    position: fixed !important;
+    z-index: 140 !important;
+    inset: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)) !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: auto !important;
+  }
+
+  .historical-decision-layer {
+    padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  }
+
+  .historical-decision-dialog {
+    max-height: calc(100dvh - 16px);
+    padding: 18px;
+  }
+
+  .map-inspector {
+    position: fixed !important;
+    z-index: 115 !important;
+    inset: auto max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)) !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: min(58dvh, 520px);
+    overflow: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .game-shell--showcase > .topbar {
+    min-height: 280px !important;
+  }
+
+  .game-shell--showcase > .topbar .game-title small,
+  .game-shell--showcase > .topbar .version-mark {
+    display: none !important;
+  }
+
+  .game-shell--showcase > .topbar .top-core-resource > div small {
+    display: none !important;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > button,
+  .game-shell--showcase > .topbar .window-switches > .top-info-control,
+  .game-shell--showcase > .topbar .window-switches > .core-health-control {
+    flex-basis: calc(50% - 3px);
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel > .map-field {
+    width: 680px !important;
+    min-width: 680px !important;
+    --map-unit-w: 58px;
+    --map-unit-h: 82px;
+  }
+
+  .game-shell--showcase .map-field .unit-card {
+    width: 56px !important;
+    min-width: 56px !important;
+    height: 80px !important;
+    min-height: 80px !important;
+    max-width: 56px !important;
+    max-height: 80px !important;
+    grid-template-rows: 10px minmax(0, 1fr) 14px 6px !important;
+  }
+
+  .game-shell--showcase .map-field .unit-avatar {
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    min-height: 50px !important;
+  }
+
+  .game-shell--showcase .map-field .unit-name,
+  .game-shell--showcase .map-field .unit-name strong {
+    width: 52px !important;
+    max-width: 52px !important;
+    font-size: 8px !important;
+    line-height: 13px !important;
+  }
+
+  .historical-choice-grid,
+  .settings-actions {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 999px) and (orientation: landscape) {
+  .game-shell--showcase > .topbar {
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: center;
+    min-height: 68px !important;
+  }
+
+  .game-shell--showcase > .topbar > div:first-child {
+    display: none !important;
+  }
+
+  .game-shell--showcase > .topbar .window-switches {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > button,
+  .game-shell--showcase > .topbar .window-switches > .top-info-control,
+  .game-shell--showcase > .topbar .window-switches > .core-health-control {
+    flex: 0 0 148px;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .core-health-control {
+    flex-basis: 190px;
+  }
+}
+
+@media (max-width: 999px) {
+  .game-shell--showcase {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .game-shell--showcase input,
+  .game-shell--showcase textarea,
+  .game-shell--showcase .settings-dialog,
+  .game-shell--showcase .mission-drawer,
+  .game-shell--showcase .historical-decision-dialog,
+  .game-shell--showcase .victory-record-drawer {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  .mobile-more-toggle {
+    display: block;
+  }
+
+  .game-shell--showcase > .topbar .missions-button,
+  .game-shell--showcase > .topbar .settings-button {
+    display: none !important;
+  }
+
+  .mobile-more-menu {
+    position: fixed;
+    z-index: 150;
+    top: max(58px, env(safe-area-inset-top));
+    right: max(8px, env(safe-area-inset-right));
+    display: grid;
+    gap: 5px;
+    width: min(210px, calc(100vw - 16px));
+    padding: 8px;
+    border: 1px solid rgba(222, 190, 104, .62);
+    background: linear-gradient(155deg, rgba(15, 35, 39, .99), rgba(5, 13, 18, .995));
+    box-shadow: 0 15px 42px rgba(0, 0, 0, .62);
+  }
+
+  .mobile-more-menu button {
+    min-height: 44px;
+    border: 1px solid rgba(119, 160, 153, .38);
+    background: rgba(8, 22, 27, .9);
+    color: #d7e5dc;
+    text-align: left;
+  }
+
+  .mobile-selection-bar {
+    position: fixed;
+    z-index: 118;
+    right: max(8px, env(safe-area-inset-right));
+    bottom: max(42px, calc(env(safe-area-inset-bottom) + 42px));
+    left: max(8px, env(safe-area-inset-left));
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    min-height: 52px;
+    padding: 6px;
+    border: 1px solid rgba(232, 200, 113, .72);
+    background: linear-gradient(150deg, rgba(22, 47, 48, .985), rgba(7, 17, 22, .995));
+    box-shadow: 0 12px 34px rgba(0, 0, 0, .58);
+  }
+
+  .mobile-selection-bar > span {
+    display: grid;
+    align-content: center;
+    min-width: 0;
+    margin-right: auto;
+    padding-inline: 6px;
+  }
+
+  .mobile-selection-bar > span b {
+    overflow: hidden;
+    color: #f1d98e;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-selection-bar > span small {
+    overflow: hidden;
+    margin-top: 3px;
+    color: #91ada4;
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-selection-bar > button {
+    min-width: 58px;
+    min-height: 44px;
+    padding: 6px 9px;
+    border: 1px solid rgba(120, 170, 160, .42);
+    background: rgba(9, 26, 30, .94);
+    color: #d8e5dd;
+  }
+
+  .mobile-selection-bar > button.danger {
+    border-color: rgba(205, 116, 92, .56);
+    color: #efb29e;
+  }
+
+  .mobile-selection-bar > button.danger.armed {
+    border-color: #e58b6c;
+    background: rgba(104, 43, 30, .96);
+    color: #ffe0c7;
+  }
+
+  .bench-grid,
+  .shop-grid,
+  .arena-side-rail > div,
+  .telemetry-rail > section {
+    touch-action: pan-x;
+  }
+
+  .settings-dialog,
+  .mission-drawer,
+  .historical-decision-dialog,
+  .decision-cards,
+  .victory-sequence,
+  .victory-record-drawer,
+  .map-inspector {
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+  }
+
+  .map-field,
+  .unit-card,
+  .enemy-token {
+    touch-action: manipulation;
+  }
+
+  .historical-choice-grid button,
+  .decision-card-grid button,
+  .settings-actions button,
+  .victory-actions button,
+  .defeat-actions button {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-menu {
+    display: grid;
+    min-height: 100vh;
+    min-height: 100dvh;
+    place-content: start stretch;
+    gap: 22px;
+    padding: max(28px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .main-menu h1 {
+    font-size: clamp(38px, 13vw, 54px);
+    letter-spacing: 6px;
+  }
+
+  .main-menu-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .main-menu-record {
+    padding: 18px;
+  }
+
+  .main-menu .landing-note {
+    position: static;
+    margin-top: 18px;
+  }
+
+  .game-shell--showcase > .topbar {
+    min-height: 0 !important;
+  }
+
+  .landscape-hint {
+    position: fixed;
+    z-index: 145;
+    right: max(10px, env(safe-area-inset-right));
+    bottom: max(10px, env(safe-area-inset-bottom));
+    left: max(10px, env(safe-area-inset-left));
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    min-height: 72px;
+    padding: 9px 10px;
+    border: 1px solid rgba(225, 193, 104, .72);
+    background: linear-gradient(145deg, rgba(18, 40, 43, .985), rgba(5, 14, 20, .995));
+    box-shadow: 0 16px 42px rgba(0, 0, 0, .64);
+  }
+
+  .landscape-hint > div {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 34px;
+    border: 1px solid #d7b75f;
+    border-radius: 5px;
+    color: #efd27d;
+    transform: rotate(-4deg);
+  }
+
+  .landscape-hint > div i {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    color: #6fc3c0;
+    font-style: normal;
+  }
+
+  .landscape-hint p {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .landscape-hint p b {
+    color: #f0d58c;
+    font: 600 15px/1.2 Georgia, "Songti SC", serif;
+  }
+
+  .landscape-hint p small {
+    color: #9db3ac;
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .landscape-hint > button {
+    min-width: 64px;
+    min-height: 44px;
+    border: 1px solid rgba(118, 172, 164, .52);
+    background: rgba(9, 28, 32, .94);
+    color: #dbe8df;
+  }
+}
+
+@media (max-width: 999px) and (orientation: landscape) {
+  .landscape-hint {
+    display: none !important;
+  }
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    overflow: hidden;
+  }
+
+  html body .game-shell--showcase {
+    position: relative;
+    display: grid !important;
+    grid-template-rows: 54px 26px minmax(0, 1fr) !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0 !important;
+    width: 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: 100dvh !important;
+    padding: max(3px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(3px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left)) !important;
+    overflow: hidden !important;
+  }
+
+  .game-shell--showcase > .topbar {
+    position: relative;
+    z-index: 70;
+    grid-row: 1 !important;
+    display: block !important;
+    width: 100%;
+    height: 54px !important;
+    min-height: 54px !important;
+    padding: 3px 0 4px !important;
+    overflow: visible !important;
+  }
+
+  .game-shell--showcase > .topbar .window-switches {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    width: 100%;
+    height: 46px;
+    overflow: visible !important;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .top-info-control {
+    flex: 0 1 78px !important;
+    width: 78px;
+    min-width: 62px;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .core-health-control {
+    flex: 0 1 142px !important;
+    width: 142px;
+    min-width: 118px;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .top-info-control > button,
+  .game-shell--showcase > .topbar .window-switches > .core-health-control > button {
+    min-height: 44px !important;
+    height: 44px !important;
+    padding: 4px 7px !important;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .top-info-control > button > span small,
+  .game-shell--showcase > .topbar .top-core-resource > div small {
+    display: none !important;
+  }
+
+  .game-shell--showcase > .topbar .top-info-control > button > i {
+    font-size: 12px;
+  }
+
+  .game-shell--showcase > .topbar .top-info-control > button b {
+    font-size: 11px;
+  }
+
+  .game-shell--showcase > .topbar .top-core-resource > div b {
+    font-size: 10px !important;
+  }
+
+  .game-shell--showcase > .topbar .top-core-resource > strong {
+    font-size: 14px !important;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .quick-wave {
+    flex: 0 1 104px !important;
+    min-width: 88px !important;
+    height: 44px !important;
+    padding: 5px 8px !important;
+    font-size: 12px !important;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .quick-combat {
+    flex: 0 0 48px !important;
+    min-width: 48px !important;
+    width: 48px !important;
+    height: 44px !important;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .mobile-more-toggle {
+    flex: 0 0 50px !important;
+    min-width: 50px !important;
+    width: 50px !important;
+    height: 44px !important;
+    padding: 4px !important;
+  }
+
+  .game-shell--showcase > .status-line {
+    grid-row: 2 !important;
+    display: flex !important;
+    gap: 6px !important;
+    width: 100%;
+    height: 26px !important;
+    min-height: 26px !important;
+    margin: 0 !important;
+    padding: 3px 6px !important;
+    overflow: visible !important;
+  }
+
+  .game-shell--showcase > .status-line .status-notice {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .game-shell--showcase > .status-line > .historical-status-inline,
+  .game-shell--showcase > .status-line > .historical-war-machine,
+  .game-shell--showcase > .status-line > button {
+    display: none !important;
+  }
+
+  .game-shell--showcase > .status-line .historical-quick-guide {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  .game-shell--showcase > .board-grid {
+    grid-row: 3 !important;
+    display: block !important;
+    width: 100%;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel {
+    position: relative;
+    display: grid !important;
+    width: 100%;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 3px !important;
+    place-items: center;
+    overflow: hidden !important;
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel > .arena-side-rail,
+  .game-shell--showcase > .board-grid > .map-panel > .telemetry-rail,
+  .game-shell--showcase > .board-grid > .economy {
+    display: none !important;
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel > .map-field {
+    grid-column: 1 !important;
+    width: auto !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    margin: auto !important;
+    aspect-ratio: 16 / 9 !important;
+  }
+
+  .game-shell--showcase .map-field {
+    --map-unit-w: 46px;
+    --map-unit-h: 66px;
+  }
+
+  .game-shell--showcase .map-field .unit-card {
+    width: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+    height: 66px !important;
+    min-height: 66px !important;
+    max-height: 66px !important;
+    grid-template-rows: 8px minmax(0, 1fr) 10px 5px !important;
+  }
+
+  .game-shell--showcase .map-field .unit-avatar {
+    width: 41px !important;
+    min-width: 41px !important;
+    height: 41px !important;
+    min-height: 41px !important;
+  }
+
+  .game-shell--showcase .map-field .unit-name,
+  .game-shell--showcase .map-field .unit-name strong {
+    width: 43px !important;
+    max-width: 43px !important;
+    font-size: 7px !important;
+    line-height: 9px !important;
+  }
+
+  html body .game-shell--showcase > .economy-deck {
+    position: fixed !important;
+    z-index: 105 !important;
+    inset: auto max(6px, env(safe-area-inset-right)) max(3px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left)) !important;
+    display: grid !important;
+    grid-template-columns: minmax(240px, 42fr) minmax(320px, 58fr) !important;
+    grid-template-rows: 34px minmax(0, 1fr) !important;
+    gap: 5px !important;
+    width: auto !important;
+    height: min(220px, 58dvh) !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 5px 5px !important;
+    overflow: hidden !important;
+    border-color: rgba(225, 191, 101, .5);
+    background: linear-gradient(180deg, rgba(9, 25, 30, .99), rgba(5, 13, 18, .998));
+    box-shadow: 0 -12px 34px rgba(0, 0, 0, .62);
+  }
+
+  html body .game-shell--showcase > .economy-deck.economy-deck-collapsed {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding-bottom: 0 !important;
+  }
+
+  .game-shell--showcase > .economy-deck.economy-deck-collapsed > .bench,
+  .game-shell--showcase > .economy-deck.economy-deck-collapsed > .shop {
+    display: none !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .economy-dock-tabs {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+    height: 34px;
+  }
+
+  .game-shell--showcase > .economy-deck > .economy-dock-tabs button {
+    min-width: 230px;
+    min-height: 34px !important;
+    height: 34px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench,
+  .game-shell--showcase > .economy-deck > .shop {
+    grid-row: 2 !important;
+    width: 100%;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .game-shell--showcase > .economy-deck .panel-heading {
+    min-height: 28px !important;
+    height: 28px !important;
+    padding: 5px 8px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench > .bench-grid {
+    grid-template-columns: repeat(9, 66px) !important;
+    gap: 6px !important;
+    width: 100%;
+    height: calc(100% - 28px) !important;
+    padding: 6px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench .slot {
+    width: 66px !important;
+    min-width: 66px !important;
+    height: 94px !important;
+    min-height: 94px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench .unit-card {
+    width: 62px !important;
+    min-width: 62px !important;
+    max-width: 62px !important;
+    height: 90px !important;
+    min-height: 90px !important;
+    max-height: 90px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench .unit-avatar {
+    width: 54px !important;
+    min-width: 54px !important;
+    height: 54px !important;
+    min-height: 54px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .shop .shop-content {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) 44px !important;
+    gap: 5px !important;
+    width: 100%;
+    height: calc(100% - 28px) !important;
+    padding: 5px !important;
+    overflow: hidden !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .shop .shop-grid {
+    grid-auto-columns: minmax(190px, 54vw) !important;
+    width: 100%;
+    height: 100% !important;
+    padding-bottom: 3px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .shop .shop-card-slot,
+  .game-shell--showcase > .economy-deck > .shop .shop-card {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .shop .shop-grid > .shop-card-slot {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .shop .shop-card-slot > .shop-card,
+  .game-shell--showcase > .economy-deck > .shop .shop-card-slot > .shop-card--empty {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .shop .shop-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-rows: 42px !important;
+    height: 42px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .shop .shop-actions button {
+    min-height: 42px !important;
+    height: 42px !important;
+  }
+
+  .game-shell--showcase:has(> .economy-deck:not(.economy-deck-collapsed)) > .mobile-selection-bar {
+    bottom: calc(min(220px, 58dvh) + max(8px, env(safe-area-inset-bottom)));
+  }
+
+  .game-shell--showcase .map-inspector {
+    right: max(8px, env(safe-area-inset-right)) !important;
+    bottom: max(42px, calc(env(safe-area-inset-bottom) + 42px)) !important;
+    left: auto !important;
+    width: min(340px, 48vw) !important;
+    max-height: calc(100dvh - 96px) !important;
+  }
+
+  .game-shell--showcase:has(> .economy-deck:not(.economy-deck-collapsed)) .map-inspector {
+    bottom: calc(min(220px, 58dvh) + max(8px, env(safe-area-inset-bottom))) !important;
+  }
+
+  .game-shell--showcase .historical-decision-layer,
+  .game-shell--showcase .decision-overlay,
+  .game-shell--showcase .resonance-popup-layer {
+    position: fixed !important;
+    z-index: 160 !important;
+    inset: 0 !important;
+    padding: max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left)) !important;
+  }
+
+  .game-shell--showcase .historical-decision-dialog,
+  .game-shell--showcase .decision-cards,
+  .game-shell--showcase .resonance-popup {
+    width: min(820px, 100%) !important;
+    max-height: calc(100dvh - 12px) !important;
+    padding: 13px !important;
+    overflow-y: auto !important;
+  }
+
+  .game-shell--showcase .historical-choice-grid,
+  .game-shell--showcase .decision-card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+
+  .game-shell--showcase .historical-choice-grid button,
+  .game-shell--showcase .decision-card-grid button {
+    min-height: 92px !important;
+  }
+
+  .game-shell--showcase .settings-dialog,
+  .game-shell--showcase .mission-drawer {
+    z-index: 165 !important;
+  }
+
+  .game-shell--showcase .tutorial-coach {
+    right: max(8px, env(safe-area-inset-right));
+    bottom: max(8px, env(safe-area-inset-bottom));
+    width: min(390px, calc(100vw - 16px));
+    max-height: calc(100dvh - 16px);
+    overflow-y: auto;
+  }
+
+  .game-shell--showcase .victory-sequence {
+    position: fixed !important;
+    z-index: 170 !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    padding: max(10px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)) !important;
+    overflow-y: auto !important;
+  }
+
+  .game-shell--showcase:has(.victory-sequence) > .topbar,
+  .game-shell--showcase:has(.victory-sequence) > .status-line,
+  .game-shell--showcase:has(.victory-sequence) > .economy-deck,
+  .game-shell--showcase:has(.victory-sequence) > .mobile-selection-bar,
+  .game-shell--showcase:has(.victory-sequence) > .mobile-more-menu,
+  .game-shell--showcase:has(.victory-sequence) > .landscape-hint {
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  .game-shell--showcase .victory-sequence .victory-lineup {
+    width: min(760px, 94%) !important;
+  }
+
+  .game-shell--showcase .victory-lineup-grid {
+    grid-template-columns: repeat(8, minmax(48px, 1fr)) !important;
+  }
+
+  .game-shell--showcase .victory-sequence .victory-actions {
+    flex-direction: row !important;
+  }
+
+  .game-shell--showcase .victory-sequence > .victory-record-layer {
+    position: fixed !important;
+    inset: 0 !important;
+    padding: max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left)) !important;
+    background: rgba(3, 10, 13, .94) !important;
+  }
+
+  .game-shell--showcase .victory-record-drawer {
+    width: min(430px, 100%) !important;
+    max-height: 100% !important;
+  }
+
+  .game-shell--showcase .victory-record-drawer > header > button,
+  .game-shell--showcase .victory-ranking > nav > button {
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 700px) and (orientation: landscape) {
+  .game-shell--showcase .historical-decision-dialog {
+    padding: 10px !important;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .top-info-control {
+    flex-basis: 70px !important;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .core-health-control {
+    flex-basis: 126px !important;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .quick-wave {
+    flex-basis: 92px !important;
+  }
+
+  .game-shell--showcase .historical-decision-dialog > header h2,
+  .game-shell--showcase .decision-cards h2 {
+    font-size: 19px;
+  }
+
+  .game-shell--showcase .historical-context,
+  .game-shell--showcase .historical-tradeoff,
+  .game-shell--showcase .decision-cards > header p {
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .game-shell--showcase .historical-context {
+    margin-top: 7px !important;
+  }
+
+  .game-shell--showcase .historical-tradeoff {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin: 8px 0 !important;
+  }
+
+  .game-shell--showcase .historical-tradeoff span {
+    padding: 8px !important;
+  }
+
+  .game-shell--showcase .historical-tradeoff span small {
+    margin-bottom: 2px !important;
+  }
+
+  .game-shell--showcase .historical-tradeoff em {
+    grid-column: 1 / -1 !important;
+  }
+
+  .game-shell--showcase .historical-choice-grid {
+    margin-top: 8px !important;
+  }
+
+  .game-shell--showcase .historical-choice-grid button {
+    min-height: 76px !important;
+    padding: 10px !important;
+  }
+
+  .game-shell--showcase .historical-choice-grid button span,
+  .game-shell--showcase .historical-choice-grid button small {
+    margin-top: 3px !important;
+  }
+}
+
+/*
+ * Compact landscape keeps the accepted desktop composition instead of
+ * replacing it with a bare battlefield: brand, resonance and telemetry remain
+ * visible, while only their density changes to suit a short phone viewport.
+ */
+@media (max-width: 999px) and (orientation: landscape) {
+  html body .game-shell--showcase {
+    grid-template-rows: 56px 24px minmax(0, 1fr) !important;
+  }
+
+  .game-shell--showcase > .topbar {
+    display: grid !important;
+    grid-template-columns: clamp(84px, 13vw, 116px) minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 6px !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    padding: 3px 0 5px !important;
+    overflow: visible !important;
+  }
+
+  .game-shell--showcase > .topbar > div:first-child {
+    display: flex !important;
+    align-items: center;
+    min-width: 0;
+    height: 46px;
+    padding-left: 7px;
+    border-left: 2px solid rgba(221, 186, 96, .78);
+    background: linear-gradient(90deg, rgba(91, 70, 32, .22), transparent);
+  }
+
+  .game-shell--showcase > .topbar .game-title {
+    overflow: hidden;
+    margin: 0 !important;
+    color: #ead38e;
+    font-size: clamp(14px, 2.25vw, 19px) !important;
+    line-height: 1.1;
+    letter-spacing: clamp(1.2px, .34vw, 3px) !important;
+    text-overflow: clip;
+    text-shadow: 0 0 18px rgba(221, 184, 92, .22);
+    white-space: nowrap;
+  }
+
+  .game-shell--showcase > .topbar .game-title .version-mark,
+  .game-shell--showcase > .topbar .game-title small {
+    display: none !important;
+  }
+
+  .game-shell--showcase > .topbar .window-switches {
+    box-sizing: border-box;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 3px !important;
+    min-width: 0;
+    height: 46px;
+    padding-right: 16px;
+    overflow: visible !important;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .top-info-control {
+    flex: 1 1 76px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 84px;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .population-info,
+  .game-shell--showcase > .topbar .window-switches > .wave-info {
+    flex-basis: 90px !important;
+    max-width: 96px;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .core-health-control {
+    flex: 1.55 1 112px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 132px;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .top-info-control > button,
+  .game-shell--showcase > .topbar .window-switches > .core-health-control > button,
+  .game-shell--showcase > .topbar .window-switches > .core-health-control > .top-core-resource {
+    box-sizing: border-box;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    overflow: hidden;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .top-info-control > button {
+    grid-template-columns: 20px minmax(0, 1fr) !important;
+    gap: 4px !important;
+    padding: 4px 5px !important;
+  }
+
+  .game-shell--showcase > .topbar .top-info-control > button > i {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 10px !important;
+  }
+
+  .game-shell--showcase > .topbar .top-info-control > button > span {
+    min-width: 0;
+  }
+
+  .game-shell--showcase > .topbar .top-info-control > button b {
+    display: block;
+    overflow: hidden;
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+
+  .game-shell--showcase > .topbar .core-health-control > .top-core-resource {
+    grid-template-columns: minmax(0, 1fr) minmax(24px, .7fr) auto !important;
+    gap: 4px !important;
+    padding: 4px 5px !important;
+  }
+
+  .game-shell--showcase > .topbar .top-core-resource > div {
+    gap: 4px !important;
+    min-width: 0;
+  }
+
+  .game-shell--showcase > .topbar .top-core-resource > div > i {
+    width: 21px !important;
+    height: 21px !important;
+    flex-basis: 21px !important;
+    font-size: 12px !important;
+  }
+
+  .game-shell--showcase > .topbar .top-core-resource > div > span {
+    min-width: 0;
+  }
+
+  .game-shell--showcase > .topbar .top-core-resource > div b {
+    display: block;
+    overflow: hidden;
+    font-size: 9px !important;
+    line-height: 1.1 !important;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+
+  .game-shell--showcase > .topbar .top-core-resource > strong {
+    font-size: 12px !important;
+  }
+
+  .game-shell--showcase > .topbar .top-core-resource > strong small {
+    display: none;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .quick-wave {
+    flex: 1.2 1 84px !important;
+    width: auto !important;
+    min-width: 78px !important;
+    max-width: 100px;
+    height: 44px !important;
+    padding: 5px 7px !important;
+    overflow: hidden;
+    font-size: 11px !important;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .quick-combat {
+    flex: 0 1 46px !important;
+    width: 46px !important;
+    min-width: 42px !important;
+    height: 44px !important;
+    padding: 4px !important;
+    overflow: hidden;
+    font-size: 11px !important;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .mobile-more-toggle {
+    flex: 0 1 50px !important;
+    width: 50px !important;
+    min-width: 48px !important;
+    height: 44px !important;
+    padding: 4px !important;
+    overflow: hidden;
+    font-size: 11px !important;
+  }
+
+  .game-shell--showcase > .status-line {
+    position: relative !important;
+    z-index: 68 !important;
+    inset: auto !important;
+    grid-row: 2 !important;
+    align-self: stretch !important;
+    height: 24px !important;
+    min-height: 24px !important;
+    margin: 0 !important;
+    padding: 2px 6px !important;
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel {
+    grid-template-columns: clamp(76px, 12vw, 112px) minmax(0, 1fr) clamp(76px, 12vw, 112px) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+    align-items: stretch !important;
+    justify-items: stretch !important;
+    gap: 4px !important;
+    padding: 3px !important;
+    place-items: stretch !important;
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel > .arena-side-rail,
+  .game-shell--showcase > .board-grid > .map-panel > .telemetry-rail {
+    position: relative !important;
+    display: block !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 5px !important;
+    overflow: hidden !important;
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel > .resonance-rail {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel > .telemetry-rail {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    overflow-y: auto !important;
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel > .map-field {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-self: center !important;
+    justify-self: center !important;
+    width: min(100%, calc((100dvh - 92px) * 16 / 9)) !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 100% !important;
+    aspect-ratio: 16 / 9 !important;
+  }
+
+  .game-shell--showcase .map-field {
+    --map-unit-w: 30px;
+    --map-unit-h: 34px;
+  }
+
+  .game-shell--showcase .map-field .unit-card {
+    width: 30px !important;
+    min-width: 30px !important;
+    max-width: 30px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    grid-template-rows: 4px minmax(0, 1fr) 6px 2px !important;
+  }
+
+  .game-shell--showcase .map-field .unit-avatar {
+    width: 26px !important;
+    min-width: 26px !important;
+    height: 26px !important;
+    min-height: 26px !important;
+  }
+
+  .game-shell--showcase .map-field .unit-name,
+  .game-shell--showcase .map-field .unit-name strong {
+    width: 29px !important;
+    max-width: 29px !important;
+    font-size: 5.5px !important;
+    line-height: 5.5px !important;
+  }
+
+  .game-shell--showcase .arena-side-rail > header {
+    gap: 1px !important;
+    margin-bottom: 4px !important;
+    padding-bottom: 4px !important;
+  }
+
+  .game-shell--showcase .arena-side-rail > header small {
+    overflow: hidden;
+    font-size: 6px !important;
+    letter-spacing: .8px !important;
+    text-overflow: ellipsis;
+  }
+
+  .game-shell--showcase .arena-side-rail > header b {
+    overflow: hidden;
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .game-shell--showcase .resonance-rail > div {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    height: calc(100% - 30px) !important;
+    padding-right: 1px;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    scroll-snap-type: none !important;
+  }
+
+  .game-shell--showcase .resonance-rail button {
+    flex: 0 0 38px !important;
+    grid-template-columns: 18px minmax(0, 1fr) !important;
+    gap: 4px !important;
+    width: 100%;
+    min-width: 0;
+    min-height: 38px !important;
+    padding: 3px 4px !important;
+  }
+
+  .game-shell--showcase .resonance-rail button > i {
+    width: 17px !important;
+    height: 17px !important;
+    font-size: 9px !important;
+  }
+
+  .game-shell--showcase .resonance-rail button > span {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    gap: 1px;
+    min-width: 0;
+  }
+
+  .game-shell--showcase .resonance-rail button b,
+  .game-shell--showcase .telemetry-rail b,
+  .game-shell--showcase .damage-rank b {
+    overflow: hidden !important;
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .game-shell--showcase .resonance-rail button b {
+    display: block;
+    max-height: 2.25em;
+    line-height: 1.08 !important;
+    overflow-wrap: anywhere;
+    text-overflow: clip !important;
+    white-space: normal !important;
+    word-break: break-all;
+  }
+
+  .game-shell--showcase .resonance-rail button small,
+  .game-shell--showcase .telemetry-rail small,
+  .game-shell--showcase .telemetry-rail p,
+  .game-shell--showcase .damage-rank small {
+    font-size: 8px !important;
+    line-height: 1.3 !important;
+  }
+
+  .game-shell--showcase .telemetry-rail > section {
+    display: block !important;
+    margin-top: 5px !important;
+    padding-top: 5px !important;
+    overflow: visible !important;
+    scroll-snap-type: none !important;
+  }
+
+  .game-shell--showcase .telemetry-rail .damage-rank {
+    display: grid !important;
+    grid-template-columns: 16px minmax(0, 1fr) !important;
+    gap: 3px !important;
+    min-width: 0 !important;
+    min-height: 28px !important;
+    margin-top: 3px !important;
+    padding: 3px !important;
+  }
+
+  .game-shell--showcase .telemetry-rail .damage-rank > i {
+    width: 15px !important;
+    height: 15px !important;
+    font-size: 7px !important;
+  }
+
+  .game-shell--showcase .telemetry-rail > section > p {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 4px 0 !important;
+  }
+}
+
+@media (max-width: 700px) and (orientation: landscape) {
+  .game-shell--showcase > .topbar {
+    grid-template-columns: 84px minmax(0, 1fr) !important;
+    gap: 4px !important;
+  }
+
+  .game-shell--showcase > .topbar .game-title {
+    font-size: 14px !important;
+    letter-spacing: 1.2px !important;
+  }
+
+  .game-shell--showcase > .topbar .window-switches {
+    gap: 2px !important;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .top-info-control {
+    flex-basis: 66px !important;
+    max-width: 72px;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .population-info,
+  .game-shell--showcase > .topbar .window-switches > .wave-info {
+    flex-basis: 82px !important;
+    max-width: 86px;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .core-health-control {
+    flex-basis: 104px !important;
+    max-width: 112px;
+  }
+
+  .game-shell--showcase > .topbar .window-switches > .quick-wave {
+    flex-basis: 78px !important;
+    min-width: 74px !important;
+  }
+
+  .game-shell--showcase > .topbar .top-info-control > button b {
+    font-size: 9px !important;
+  }
+
+  .game-shell--showcase > .topbar .top-core-resource > div > i {
+    display: none !important;
+  }
+
+  .game-shell--showcase > .topbar .core-health-control > .top-core-resource {
+    grid-template-columns: minmax(38px, 1fr) minmax(20px, .65fr) auto !important;
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel {
+    grid-template-columns: 76px minmax(0, 1fr) 76px !important;
+  }
+
+  .game-shell--showcase .map-field {
+    --map-unit-w: 26px;
+    --map-unit-h: 30px;
+  }
+
+  .game-shell--showcase .map-field .unit-card {
+    width: 26px !important;
+    min-width: 26px !important;
+    max-width: 26px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
+    grid-template-rows: 4px minmax(0, 1fr) 5px 2px !important;
+  }
+
+  .game-shell--showcase .map-field .unit-avatar {
+    width: 23px !important;
+    min-width: 23px !important;
+    height: 23px !important;
+    min-height: 23px !important;
+  }
+
+  .game-shell--showcase .map-field .unit-name,
+  .game-shell--showcase .map-field .unit-name strong {
+    width: 25px !important;
+    max-width: 25px !important;
+    font-size: 5px !important;
+    line-height: 5px !important;
+  }
+
+  .game-shell--showcase .arena-side-rail {
+    padding: 4px !important;
+  }
+
+  .game-shell--showcase .arena-side-rail > header small {
+    display: none;
+  }
+
+  .game-shell--showcase .resonance-rail button {
+    flex-basis: 38px !important;
+    grid-template-columns: 14px minmax(0, 1fr) !important;
+    gap: 2px !important;
+    padding: 3px !important;
+  }
+
+  .game-shell--showcase .resonance-rail button > i {
+    width: 13px !important;
+    height: 13px !important;
+    font-size: 8px !important;
+  }
+
+  .game-shell--showcase .resonance-rail button > span {
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-content: center;
+    gap: 1px;
+  }
+
+  .game-shell--showcase .resonance-rail button b {
+    font-size: 8px !important;
+    line-height: 1.05 !important;
+  }
+
+  .game-shell--showcase .resonance-rail button small {
+    font-size: 7px !important;
+  }
+}
+
+/*
+ * Phone operation model: the reserve is a permanent strip under the
+ * battlefield; the market is an independent five-card overlay. This keeps the
+ * map-to-reserve gesture short without making the player choose between seeing
+ * the reserve and seeing the battlefield.
+ */
+@media (max-width: 999px) and (orientation: landscape) {
+  html body .game-shell--showcase {
+    grid-template-rows: 56px 24px minmax(0, 1fr) 64px !important;
+  }
+
+  .game-shell--showcase > .board-grid {
+    grid-row: 3 !important;
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel > .map-field {
+    width: min(100%, calc((100dvh - 156px) * 16 / 9)) !important;
+  }
+
+  html body .game-shell--showcase > .economy-deck,
+  html body .game-shell--showcase > .economy-deck.economy-deck-collapsed {
+    position: relative !important;
+    z-index: 105 !important;
+    inset: auto !important;
+    grid-row: 4 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: 22px 39px !important;
+    gap: 0 !important;
+    width: 100% !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 1px solid rgba(216, 184, 94, .5);
+    background: linear-gradient(180deg, rgba(10, 27, 32, .99), rgba(5, 14, 19, .998));
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, .38);
+  }
+
+  .game-shell--showcase > .economy-deck > .economy-dock-tabs {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: space-between !important;
+    gap: 5px !important;
+    width: 100%;
+    height: 22px !important;
+    min-height: 22px !important;
+    padding: 0 5px !important;
+    border-bottom: 1px solid rgba(125, 165, 156, .28);
+    background: linear-gradient(90deg, rgba(17, 39, 43, .96), rgba(8, 23, 29, .98));
+  }
+
+  .game-shell--showcase > .economy-deck > .economy-dock-tabs > .desktop-dock-toggle {
+    display: none !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .economy-dock-tabs > .mobile-bench-tab {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    color: #e5cd86;
+    font: 600 11px/1 Georgia, "Songti SC", serif;
+    letter-spacing: .5px;
+  }
+
+  .game-shell--showcase > .economy-deck > .economy-dock-tabs > .mobile-bench-tab b {
+    color: #79bab5;
+    font: 700 9px/1 Arial, sans-serif;
+  }
+
+  .game-shell--showcase > .economy-deck > .economy-dock-tabs > .mobile-shop-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: auto !important;
+    min-width: 116px !important;
+    height: 21px !important;
+    min-height: 21px !important;
+    padding: 2px 9px !important;
+    border: 1px solid rgba(213, 180, 91, .48);
+    border-bottom: 0;
+    background: rgba(56, 44, 24, .64);
+    color: #efd58c;
+    font-size: 10px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .economy-dock-tabs > .mobile-shop-toggle b {
+    color: #7dc6bf;
+    font-size: 8px;
+  }
+
+  .game-shell--showcase > .economy-deck > .economy-dock-tabs > .mobile-shop-toggle.active {
+    border-color: #e0bd63;
+    background: linear-gradient(180deg, rgba(111, 78, 32, .9), rgba(42, 34, 23, .94));
+    color: #fff0bb;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench,
+  .game-shell--showcase > .economy-deck.economy-deck-collapsed > .bench {
+    position: relative !important;
+    display: block !important;
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    height: 39px !important;
+    min-height: 39px !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    background: rgba(6, 18, 23, .96) !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench > .panel-heading {
+    display: none !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench > .bench-grid {
+    display: grid !important;
+    grid-template-columns: repeat(9, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    width: 100% !important;
+    height: 39px !important;
+    min-height: 39px !important;
+    padding: 3px 5px !important;
+    overflow: hidden !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench .slot {
+    width: auto !important;
+    min-width: 0 !important;
+    height: 33px !important;
+    min-height: 33px !important;
+    overflow: visible !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench .slot-empty {
+    font-size: 7px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench .unit-card {
+    width: min(44px, 100%) !important;
+    min-width: 0 !important;
+    max-width: 44px !important;
+    height: 33px !important;
+    min-height: 33px !important;
+    max-height: 33px !important;
+    margin: auto;
+    grid-template-rows: 3px minmax(0, 1fr) 5px 2px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench .unit-avatar {
+    width: 24px !important;
+    min-width: 24px !important;
+    height: 24px !important;
+    min-height: 24px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench .unit-name,
+  .game-shell--showcase > .economy-deck > .bench .unit-name strong {
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 6px !important;
+    line-height: 6px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .shop {
+    display: none !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop {
+    position: fixed !important;
+    z-index: 124 !important;
+    right: max(6px, env(safe-area-inset-right)) !important;
+    bottom: calc(64px + max(3px, env(safe-area-inset-bottom))) !important;
+    left: max(6px, env(safe-area-inset-left)) !important;
+    display: grid !important;
+    grid-template-rows: 25px minmax(0, 1fr) !important;
+    width: auto !important;
+    height: min(156px, 43dvh) !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(226, 192, 98, .72) !important;
+    background: linear-gradient(180deg, rgba(11, 30, 35, .995), rgba(5, 14, 19, .998)) !important;
+    box-shadow: 0 -14px 38px rgba(0, 0, 0, .68), inset 0 0 36px rgba(75, 130, 126, .08);
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop > .panel-heading {
+    min-height: 25px !important;
+    height: 25px !important;
+    padding: 4px 7px !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .panel-title-inline > b {
+    font-size: 11px !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .panel-title-inline > small {
+    font-size: 7px !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-content {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 98px !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+    gap: 5px !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 4px !important;
+    overflow: hidden !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    grid-auto-columns: auto !important;
+    gap: 4px !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-card-slot,
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-card {
+    display: grid !important;
+    grid-template-columns: 38px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 4px !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .portrait {
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-text h3 {
+    font-size: 10px !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-card-heading {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 2px !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .cost {
+    font-size: 8px !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-meta {
+    margin: 3px 0 !important;
+    font-size: 7px !important;
+    line-height: 1.2 !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-skill {
+    display: block !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-skill > small {
+    font-size: 7px !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-skill-summary,
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-stats {
+    display: none !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-actions {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    width: 98px !important;
+    height: 100% !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-actions button {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 3px !important;
+    font-size: 9px !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-actions button b {
+    font-size: 8px !important;
+  }
+
+  .game-shell--showcase:has(> .economy-deck.mobile-shop-open) > .mobile-selection-bar,
+  .game-shell--showcase:has(> .economy-deck.mobile-shop-open) .map-inspector {
+    bottom: calc(min(156px, 43dvh) + 68px) !important;
+  }
+
+  .game-shell--showcase > .mobile-selection-bar,
+  .game-shell--showcase .map-inspector {
+    bottom: 68px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .game-shell--showcase .decision-overlay--research {
+    box-sizing: border-box;
+    align-items: center !important;
+    padding-top: max(6px, env(safe-area-inset-top)) !important;
+    padding-bottom: calc(12px + 10dvh) !important;
+  }
+}
+
+@media (max-width: 700px) and (orientation: landscape) {
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-content {
+    grid-template-columns: minmax(0, 1fr) 88px !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-actions {
+    width: 88px !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-card {
+    grid-template-columns: 32px minmax(0, 1fr) !important;
+    gap: 3px !important;
+    padding: 3px !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .portrait {
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-text h3 {
+    font-size: 9px !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-meta,
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-skill > small {
+    font-size: 6.5px !important;
+  }
+}
+
+/*
+ * Final phone battlefield composition: reserve pieces belong to the arena.
+ * The lower row has no panel identity of its own; it is only nine subtle
+ * landing marks and any pieces currently waiting to be deployed.
+ */
+@media (max-width: 999px) and (orientation: landscape) {
+  html body .game-shell--showcase {
+    grid-template-rows: 56px 24px minmax(0, 1fr) !important;
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel > .map-field {
+    width: min(100%, calc((100dvh - 92px) * 16 / 9)) !important;
+  }
+
+  .game-shell--showcase .map-field {
+    --map-unit-w: 34px;
+    --map-unit-h: 42px;
+  }
+
+  .game-shell--showcase .map-field .unit-card {
+    width: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    grid-template-rows: 5px minmax(0, 1fr) 7px 3px !important;
+  }
+
+  .game-shell--showcase .map-field .unit-avatar {
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+  }
+
+  .game-shell--showcase .map-field .unit-name,
+  .game-shell--showcase .map-field .unit-name strong {
+    width: 32px !important;
+    max-width: 32px !important;
+    font-size: 6px !important;
+    line-height: 6px !important;
+  }
+
+  html body .game-shell--showcase > .economy-deck,
+  html body .game-shell--showcase > .economy-deck.economy-deck-collapsed {
+    position: fixed !important;
+    z-index: 105 !important;
+    inset: auto max(6px, env(safe-area-inset-right)) max(3px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left)) !important;
+    display: block !important;
+    width: auto !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    pointer-events: none;
+  }
+
+  .game-shell--showcase > .economy-deck > .economy-dock-tabs {
+    position: absolute !important;
+    right: 0;
+    bottom: 0;
+    display: block !important;
+    width: clamp(76px, 12vw, 112px) !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    pointer-events: auto;
+  }
+
+  .game-shell--showcase > .economy-deck > .economy-dock-tabs > .mobile-bench-tab,
+  .game-shell--showcase > .economy-deck > .economy-dock-tabs > .desktop-dock-toggle {
+    display: none !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .economy-dock-tabs > .mobile-shop-toggle {
+    display: inline-flex;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    border: 1px solid rgba(224, 190, 98, .62);
+    background: linear-gradient(150deg, rgba(72, 54, 25, .94), rgba(15, 30, 31, .97));
+    box-shadow: 0 7px 18px rgba(0, 0, 0, .44);
+  }
+
+  .game-shell--showcase > .economy-deck > .bench,
+  .game-shell--showcase > .economy-deck.economy-deck-collapsed > .bench {
+    position: absolute !important;
+    right: calc(clamp(76px, 12vw, 112px) + 5px) !important;
+    bottom: 0 !important;
+    left: calc(clamp(76px, 12vw, 112px) + 5px) !important;
+    display: block !important;
+    width: auto !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    pointer-events: auto;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench > .panel-heading {
+    display: none !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench > .bench-grid {
+    display: grid !important;
+    grid-template-columns: repeat(9, minmax(0, 1fr)) !important;
+    gap: 3px !important;
+    width: 100% !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 1px 0 !important;
+    overflow: visible !important;
+    background: linear-gradient(90deg, transparent, rgba(5, 16, 20, .72) 8%, rgba(5, 16, 20, .72) 92%, transparent);
+  }
+
+  .game-shell--showcase > .economy-deck > .bench .slot {
+    width: auto !important;
+    min-width: 0 !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench .slot-empty {
+    display: grid;
+    width: 24px;
+    height: 24px;
+    margin: auto;
+    place-items: center;
+    overflow: hidden;
+    border: 1px dashed rgba(105, 153, 149, .34);
+    background: rgba(8, 24, 28, .38);
+    clip-path: polygon(50% 0, 94% 24%, 94% 76%, 50% 100%, 6% 76%, 6% 24%);
+    color: transparent !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench .unit-card {
+    width: min(38px, 100%) !important;
+    min-width: 0 !important;
+    max-width: 38px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    margin: auto;
+    grid-template-rows: 4px minmax(0, 1fr) 6px 2px !important;
+    filter: drop-shadow(0 5px 6px rgba(0, 0, 0, .58));
+  }
+
+  .game-shell--showcase > .economy-deck > .bench .unit-avatar {
+    width: 29px !important;
+    min-width: 29px !important;
+    height: 29px !important;
+    min-height: 29px !important;
+  }
+
+  .game-shell--showcase > .economy-deck > .bench .unit-name,
+  .game-shell--showcase > .economy-deck > .bench .unit-name strong {
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 6px !important;
+    line-height: 6px !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop {
+    bottom: calc(45px + max(3px, env(safe-area-inset-bottom))) !important;
+  }
+
+  .game-shell--showcase > .mobile-selection-bar,
+  .game-shell--showcase .map-inspector {
+    bottom: 48px !important;
+  }
+
+  .game-shell--showcase:has(> .economy-deck.mobile-shop-open) > .mobile-selection-bar,
+  .game-shell--showcase:has(> .economy-deck.mobile-shop-open) .map-inspector {
+    bottom: calc(min(156px, 43dvh) + 50px) !important;
+  }
+}
+
+@media (max-width: 700px) and (orientation: landscape) {
+  .game-shell--showcase .map-field {
+    --map-unit-w: 30px;
+    --map-unit-h: 38px;
+  }
+
+  .game-shell--showcase .map-field .unit-card {
+    width: 30px !important;
+    min-width: 30px !important;
+    max-width: 30px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    grid-template-rows: 5px minmax(0, 1fr) 6px 3px !important;
+  }
+
+  .game-shell--showcase .map-field .unit-avatar {
+    width: 27px !important;
+    min-width: 27px !important;
+    height: 27px !important;
+    min-height: 27px !important;
+  }
+
+  .game-shell--showcase .map-field .unit-name,
+  .game-shell--showcase .map-field .unit-name strong {
+    width: 29px !important;
+    max-width: 29px !important;
+    font-size: 5.5px !important;
+    line-height: 6px !important;
+  }
+}
+
+/*
+ * Mobile interaction hardening after live-device acceptance. This block stays
+ * last so it owns the final phone geometry without changing the desktop rules.
+ */
+@media (max-width: 999px) and (orientation: landscape) {
+  html body .game-shell--showcase {
+    grid-template-rows: 56px 18px minmax(0, 1fr) !important;
+  }
+
+  .game-shell--showcase > .status-line {
+    z-index: 82 !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: 18px !important;
+    min-height: 18px !important;
+    gap: 4px !important;
+    padding: 0 5px !important;
+  }
+
+  .game-shell--showcase > .status-line .status-notice {
+    min-width: 0 !important;
+    font-size: 8px !important;
+  }
+
+  .game-shell--showcase > .status-line .historical-quick-guide {
+    margin-right: 0 !important;
+    margin-left: auto !important;
+  }
+
+  .game-shell--showcase > .status-line .historical-quick-guide > summary {
+    min-height: 16px !important;
+    height: 16px !important;
+    padding: 0 5px !important;
+    font-size: 9px !important;
+    line-height: 14px !important;
+  }
+
+  .game-shell--showcase .historical-quick-guide-panel {
+    position: fixed !important;
+    z-index: 176 !important;
+    /*
+     * This panel lives inside the translated status strip, so its fixed
+     * containing block already starts below the top bar.
+     */
+    top: 20px !important;
+    right: max(6px, env(safe-area-inset-right)) !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: min(340px, calc(100vw - 12px)) !important;
+    max-height: calc(100dvh - 84px) !important;
+    padding: 11px 12px !important;
+    overflow: auto !important;
+  }
+
+  .game-shell--showcase .top-info-control .top-info-popover,
+  .game-shell--showcase .core-health-control .core-damage-ledger {
+    position: absolute !important;
+    z-index: 180 !important;
+    top: calc(100% + 4px) !important;
+    bottom: auto !important;
+    max-width: calc(100vw - 16px) !important;
+    max-height: calc(100dvh - 64px) !important;
+    overflow: auto !important;
+  }
+
+  .game-shell--showcase .top-info-control:not(.wave-info) .top-info-popover {
+    right: auto !important;
+    left: 0 !important;
+    width: min(340px, calc(100vw - 16px)) !important;
+    transform: none !important;
+  }
+
+  .game-shell--showcase .wave-info .wave-breakdown {
+    right: auto !important;
+    left: 50% !important;
+    width: min(480px, calc(100vw - 16px)) !important;
+    transform: translateX(-50%) !important;
+  }
+
+  .game-shell--showcase .core-health-control .core-damage-ledger {
+    right: 0 !important;
+    left: auto !important;
+    width: min(360px, calc(100vw - 16px)) !important;
+    transform: none !important;
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel {
+    grid-template-columns:
+      clamp(82px, 11vw, 104px)
+      minmax(0, 1fr)
+      clamp(82px, 11vw, 104px) !important;
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel > .map-field {
+    width: min(100%, calc((100dvh - 88px) * 16 / 9)) !important;
+  }
+
+  .game-shell--showcase .arena-side-rail > header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-items: start !important;
+    align-content: start !important;
+    gap: 2px !important;
+  }
+
+  .game-shell--showcase .arena-side-rail > header small,
+  .game-shell--showcase .arena-side-rail > header b {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop {
+    pointer-events: auto !important;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-skill-summary {
+    display: -webkit-box !important;
+    margin: 2px 0 0 !important;
+    overflow: hidden !important;
+    color: #9fb5ad !important;
+    font-size: 7.5px !important;
+    line-height: 1.2 !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-stats {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 1px 4px !important;
+    margin-top: 2px !important;
+    overflow: hidden;
+    font-size: 7px !important;
+    line-height: 1.1 !important;
+  }
+}
+
+@media (max-width: 999px) and (orientation: landscape) {
+  .game-shell--showcase > .topbar .window-switches > .core-health-control {
+    flex: 0 1 164px !important;
+    width: 164px !important;
+    min-width: 156px !important;
+    max-width: 172px;
+  }
+
+  .game-shell--showcase > .topbar .core-health-control > .top-core-resource {
+    grid-template-columns: 66px minmax(42px, 1fr) auto !important;
+  }
+
+  .game-shell--showcase > .topbar .top-core-resource > div > span {
+    padding-left: 3px;
+    overflow: visible;
+  }
+
+  .game-shell--showcase > .topbar .top-core-resource > div b {
+    width: 4.25em;
+    min-width: 4.25em;
+    max-width: none;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 700px) and (orientation: landscape) {
+  .game-shell--showcase > .topbar .window-switches > .core-health-control {
+    flex: 0 1 136px !important;
+    width: 136px !important;
+    min-width: 128px !important;
+    max-width: 144px;
+  }
+
+  .game-shell--showcase > .board-grid > .map-panel {
+    grid-template-columns: 72px minmax(0, 1fr) 72px !important;
+  }
+
+  .game-shell--showcase > .topbar .core-health-control > .top-core-resource {
+    grid-template-columns: 56px minmax(34px, 1fr) auto !important;
+  }
+
+  .game-shell--showcase > .topbar .top-core-resource > div > span {
+    padding-left: 5px;
+    overflow: visible;
+  }
+
+  .game-shell--showcase > .topbar .top-core-resource > div b {
+    width: 4.25em;
+    min-width: 4.25em;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-skill-summary {
+    font-size: 6.5px !important;
+    -webkit-line-clamp: 1;
+  }
+
+  .game-shell--showcase > .economy-deck.mobile-shop-open > .shop .shop-stats {
+    gap: 1px 2px !important;
+    font-size: 6px !important;
+    white-space: nowrap;
+  }
+}

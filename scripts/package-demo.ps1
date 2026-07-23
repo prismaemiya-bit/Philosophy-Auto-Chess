@@ -3,10 +3,11 @@ param([string]$ReleaseRoot = (Join-Path $PSScriptRoot "..\release"))
 $ErrorActionPreference = "Stop"
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $releaseRoot = [IO.Path]::GetFullPath($ReleaseRoot)
-$name = "philosophy-auto-chess-v0.1-demo-windows-portable"
+$releaseInfo = Get-Content -LiteralPath (Join-Path $root "release-info.json") -Raw -Encoding utf8 | ConvertFrom-Json
+$name = "$($releaseInfo.artifactBase)-windows-portable"
 $target = Join-Path $releaseRoot $name
 $packageZip = Join-Path $releaseRoot "$name.zip"
-$sourceZip = Join-Path $releaseRoot "philosophy-auto-chess-v0.1-demo-source.zip"
+$sourceZip = Join-Path $releaseRoot "$($releaseInfo.artifactBase)-source.zip"
 
 foreach ($path in @($target, $packageZip, $sourceZip)) {
   if (Test-Path -LiteralPath $path) { throw "Demo artifact already exists and will not be overwritten: $path" }
@@ -28,9 +29,10 @@ Copy-Item -LiteralPath (Join-Path $root "dist") -Destination (Join-Path $target 
 Copy-Item -LiteralPath $runtime -Destination (Join-Path $target "runtime\node.exe")
 Copy-Item -LiteralPath (Join-Path $root "scripts\portable-server.mjs") -Destination (Join-Path $target "portable-server.mjs")
 Copy-Item -LiteralPath (Join-Path $root "scripts\portable-start.cmd") -Destination (Join-Path $target "start-game.cmd")
-Copy-Item -LiteralPath (Join-Path $root "scripts\portable-start.cmd") -Destination (Join-Path $target "启动往哲荣耀.cmd")
+Copy-Item -LiteralPath (Join-Path $root "scripts\portable-start.cmd") -Destination (Join-Path $target $releaseInfo.launcherName)
 Copy-Item -LiteralPath (Join-Path $root "QUICKSTART.txt") -Destination $target
-Copy-Item -LiteralPath (Join-Path $root "RELEASE_NOTES_v0.1-demo.md") -Destination $target
+Copy-Item -LiteralPath (Join-Path $root "release-info.json") -Destination $target
+Copy-Item -LiteralPath (Join-Path $root $releaseInfo.releaseNotes) -Destination $target
 
 $forbidden = Get-ChildItem -LiteralPath $target -Recurse -Force | Where-Object {
   $_.FullName -match "(User Data|Local Storage|IndexedDB|idea-garrison-v01-save|philosophy-auto-chess-save|\.log$|\.pid$)"
@@ -46,15 +48,15 @@ Set-Content -LiteralPath (Join-Path $target "SHA256SUMS.txt") -Value $manifest -
 & tar.exe -a -cf $packageZip -C $target .
 if ($LASTEXITCODE -ne 0) { throw "Unable to create portable ZIP." }
 
-$staging = Join-Path ([IO.Path]::GetTempPath()) "philosophy-auto-chess-v0.1-demo-source"
+$staging = Join-Path ([IO.Path]::GetTempPath()) "$($releaseInfo.artifactBase)-source"
 if (Test-Path -LiteralPath $staging) { Remove-Item -LiteralPath $staging -Recurse -Force }
 New-Item -ItemType Directory -Path $staging | Out-Null
 $sourceItems = @(
   "app", "public", "scripts", "tests", "worker", "build", ".openai",
-  "package.json", "package-lock.json", "tsconfig.json", "vite.config.ts", "next.config.ts",
+  "package.json", "package-lock.json", "release-info.json", "tsconfig.json", "vite.config.ts", "next.config.ts",
   "eslint.config.mjs", "postcss.config.mjs", "README.md", "QUICKSTART.txt",
   "DESIGN_V02.md", "MECHANICS_AUDIT.md", "WORKLOG_V02.md", "MAP_ART_SPEC.md",
-  "RELEASE_NOTES_v0.1-demo.md"
+  $releaseInfo.releaseNotes
 )
 foreach ($item in $sourceItems) {
   $source = Join-Path $root $item
@@ -67,7 +69,7 @@ Remove-Item -LiteralPath $staging -Recurse -Force
 $artifactHashes = @($packageZip, $sourceZip) | ForEach-Object {
   "{0}  {1}" -f (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash.ToLowerInvariant(), (Split-Path $_ -Leaf)
 }
-Set-Content -LiteralPath (Join-Path $releaseRoot "v0.1-demo-SHA256SUMS.txt") -Value $artifactHashes -Encoding utf8
+Set-Content -LiteralPath (Join-Path $releaseRoot "$($releaseInfo.versionId)-SHA256SUMS.txt") -Value $artifactHashes -Encoding utf8
 
 Write-Host "Portable Demo: $target"
 Write-Host "Package ZIP: $packageZip"

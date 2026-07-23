@@ -4,7 +4,7 @@
 
 **Philosophy Auto Chess** is a single-player strategy game prototype that combines fixed-route tower defense with auto-battler economy and team-building. Deploy philosophers across three authored lanes, build philosophical resonances, make preparation-stage decisions, and defend the Philosopher's Stone through ten escalating waves.
 
-This repository contains the source for the **v0.1 Demo**. The interface is currently in Simplified Chinese.
+This repository contains the source for **v0.2**, developed by **折射棱镜**. The interface is currently in Simplified Chinese.
 
 ## Features
 
@@ -16,7 +16,10 @@ This repository contains the source for the **v0.1 Demo**. The interface is curr
 - Player-facing preparation choices, including the Greek rostrum, French revolution node, British research and Enlightenment agenda
 - Philosopher King throne and Royal Barrier unlocked by a two-star Plato
 - Ten-wave campaign with the W5 boss **Cave Shadow** and W10 final boss **Absolute Spirit**
-- Versioned V6 local save migration, wave retry checkpoints and balance-report export
+- Deterministic historical events, ideology choices and war-machine encounters
+- Versioned V7 local saves, V1–V6 migration, wave retry checkpoints and player-facing save import/export
+- Responsive desktop and touch-first landscape phone layouts served by the same game core
+- Installable PWA metadata with a conservative online-first update strategy
 - Deterministic combat core with fixed time steps, an event queue and non-recursive effect guards
 
 ## Screenshots
@@ -74,7 +77,7 @@ The test command runs TypeScript checking, ESLint, a production build, determini
 
 ## Demo notes
 
-See [DEMO.md](DEMO.md) for gameplay instructions, scope and feedback guidance. The current battlefield art is temporary; route, deployment and combat coordinates are already frozen for the Demo.
+See [DEMO.md](DEMO.md) for gameplay instructions, scope and feedback guidance. v0.2 uses the final 1600×900 battlefield artwork while preserving the frozen route, deployment and combat coordinates.
 
 ## Development process
 

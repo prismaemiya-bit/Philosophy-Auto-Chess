@@ -5,8 +5,8 @@ const polyline = (lane: LaneId) => routeDefinitions[lane].map((waypoint) => svgP
 const laneLabel: Record<LaneId, string> = { upper: "A", lower: "B", side: "C" };
 
 /**
- * Review-only code map. Every visual coordinate comes from positions.ts; no
- * background cover/cropping and no separately scaled gameplay layer exists.
+ * The supplied painted map and this validation overlay share one frozen
+ * 1600x900 surface. Gameplay coordinates still come only from positions.ts.
  */
 export function MapArt({ dangerLanes, debug = false }: { dangerLanes: Set<string>; debug?: boolean }) {
   const core = routeDefinitions.upper.at(-1)!.point;
@@ -18,8 +18,7 @@ export function MapArt({ dangerLanes, debug = false }: { dangerLanes: Set<string
       <pattern id="map-grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M100 0H0V100" fill="none" stroke="#79a8b0" strokeOpacity=".055" /></pattern>
       <filter id="map-glow"><feGaussianBlur stdDeviation="7" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
     </defs>
-    <rect width="1600" height="900" fill="url(#map-vacuum)" />
-    <rect width="1600" height="900" fill="url(#map-grid)" />
+    {debug && <><rect width="1600" height="900" fill="url(#map-vacuum)" fillOpacity=".34" /><rect width="1600" height="900" fill="url(#map-grid)" /></>}
     <g className="map-platforms">{MAP_PLATFORM_PATHS.map((path) => <path key={path} d={path} />)}</g>
     {(Object.keys(routeDefinitions) as LaneId[]).map((lane) => <g key={lane} className={`map-route ${lane} ${dangerLanes.has(lane) ? "danger" : ""}`}>
       <polyline className="road-shadow" strokeWidth={MAP_ROAD_WIDTHS[lane].shadow} points={polyline(lane)} />

@@ -39,6 +39,8 @@ export type EffectProfile = {
   derivedEffect?: boolean;
   copyable?: boolean;
   tags?: string[];
+  /** Portion added by the throne's 10% amplification, for diagnostics only. */
+  throneBonusAmount?: number;
 };
 
 export type CombatEvent = EffectProfile & { sequence: number };
@@ -160,12 +162,20 @@ const tier = <T extends readonly number[]>(count: number, thresholds: T): T[numb
 export function createTraitSnapshot(
   pieces: Piece[],
   options: PreparationPlan = {},
+  factionCountCap?: Partial<Record<FactionId, number>>,
 ): TraitSnapshot {
   const deployed = pieces.filter((piece) => (piece.slotId.startsWith("deploy-") || piece.slotId === "throne-1") && characterById[piece.characterId]);
   const deployedCharacterIds = new Set(deployed.map((piece) => piece.characterId));
   const philosopherKingUnlocked = deployed.some((piece) => piece.characterId === "plato" && piece.star >= 2);
-  const factionCounts: Record<FactionId, number> = { greece: 0, germany: 0, france: 0, britain: 0 };
-  deployedCharacterIds.forEach((characterId) => { factionCounts[characterById[characterId].faction] += 1; });
+  const rawFactionCounts: Record<FactionId, number> = { greece: 0, germany: 0, france: 0, britain: 0 };
+  deployedCharacterIds.forEach((characterId) => { rawFactionCounts[characterById[characterId].faction] += 1; });
+  const factionCounts: Record<FactionId, number> = { ...rawFactionCounts };
+  if (factionCountCap) {
+    (Object.keys(factionCounts) as FactionId[]).forEach((id) => {
+      const cap = factionCountCap[id];
+      if (typeof cap === "number") factionCounts[id] = Math.min(factionCounts[id], cap);
+    });
+  }
   const greekUnits = deployed.filter((piece) => characterById[piece.characterId].faction === "greece");
   const automaticRostrum = [...greekUnits].sort((a, b) => b.star - a.star || characterById[b.characterId].cost - characterById[a.characterId].cost || a.id.localeCompare(b.id))[0]?.id;
   const requestedRostrum = options.rostrumId && greekUnits.some((piece) => piece.id === options.rostrumId) ? options.rostrumId : undefined;
