@@ -10,6 +10,7 @@ node_modules/
 
 # Production and framework output
 dist/
+dist-pages/
 .next/
 .vinext/
 out/
